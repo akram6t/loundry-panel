@@ -2,7 +2,7 @@ import React from 'react';
 
 const LoadingSpinner = () => {
   return (
-    <div role="status" className="flex px-2 items-center justify-center">
+    <div role="status" className="w-fit flex px-2 items-center justify-center">
       <svg
         aria-hidden="true"
         className="w-5 h-5 text-gray-200 animate-spin dark:text-white-600 fill-emerald-600"

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "./../../../components/Navbar/Index";
 import { useOutletContext, useParams } from "react-router-dom";
 import Linking from "../../../components/Other/Linking";
@@ -7,18 +7,65 @@ import AddressDetails from "./AddressDetails";
 import ServicesTables from "./ServicesTables";
 
 import { useSelector } from 'react-redux';
+import { Collections, URL_GET_LIST } from "../../../utils/Constant";
+import axios from "axios";
+import { formatDate } from "../../../utils/FormatDate";
+import formatTime from "../../../utils/FormatTime";
+import ProgressBar from "./../../../components/Other/ProgressBar";
 
 function OrderDetails() {
   const [sidebarToggle] = useOutletContext();
+  const [ loading, setLoading ] = useState(false);
   const { order_id } = useParams();
+  const [ details, setDetails ] = useState(null);
 
-  const [status, setOrderStatus] = useState('Shipped');
+  const [status, setOrderStatus] = useState('');
 
   const order_status = useSelector((state) => state.orderstatus.value);
+
+  
+  const getOrder = async () => {
+    setLoading(true);
+    const params = {
+      collection: Collections.ORDERS,
+      filter: JSON.stringify({order_id: order_id}),
+    }
+    try {
+      const response = await axios.get(URL_GET_LIST(params));
+
+      if (response.status === 200) {
+        setLoading(false);
+        const {status, data, message} = response.data;
+        if(status){
+          setOrderStatus(data[0].order_status);
+          setDetails(data[0]);
+          // console.log(data);
+        }
+      } else {
+        console.error('Error fetching order details:', response.statusText);
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error('Error fetching order details:', error);
+    }
+  };
+
+
+  useEffect(() => {
+    getOrder();
+  }, []);
 
 
   const handleChangeStatus = (value) => {
     // setDateFilter({ ...dateFilter, order_status: value });
+  }
+
+  if(details == null){
+    return(
+      <div className="bg-slate-100 flex items-center justify-center h-screen w-full">
+        <ProgressBar/>
+      </div>
+    );
   }
 
   return (
@@ -41,11 +88,11 @@ function OrderDetails() {
 
               <div className="flex items-center justify-between">
                 <div className="text-center sm:text-lg font-semibold text-emerald-700">
-                  <h3>12 March 2023</h3>
-                  <h3>10:35 PM</h3>
+                  <h3>{details?.order_date && formatDate(details?.order_date)}</h3>
+                  <h3>{details?.order_date && formatTime(details?.order_date)}</h3>
                 </div>
                 <h3 className="hidden sm:block sm:text-xl font-semibold text-emerald-700">{order_id}</h3>
-                <select value={status} onChange={(e) => setOrderStatus(e.target.value)} style={{ backgroundColor: order_status.find(item => item.tag == status).color }} className={`text-sm sm:text-lg text-white placeholder-gray-500 px-4 rounded-lg border border-gray-200 md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1`}>
+                <select value={details?.order_status && status} onChange={(e) => setOrderStatus(e.target.value)} style={{ backgroundColor: order_status.find(item => item.tag == status).color }} className={`text-sm sm:text-lg text-white placeholder-gray-500 px-4 rounded-lg border border-gray-200 md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1`}>
                   {
                     order_status.map((item, index) => {
                       return (
@@ -62,13 +109,13 @@ function OrderDetails() {
               <div className="mt-2 text-sm flex item-center justify-between">
                 <div className="font-semibold">
                   <h1 className="text-lg text-black font-bold">Pickup Date</h1>
-                  <h3><span className="font-medium">Date: </span>21 feb 2023</h3>
-                  <h3><span className="font-medium">Time: </span>09-10 pm</h3>
+                  <h3><span className="font-medium">Date: </span>{formatDate(details.pickup_date.date)}</h3>
+                  <h3><span className="font-medium">Time: </span>{details.pickup_date.time}</h3>
                 </div>
                 <div className="font-semibold">
                   <h1 className="text-lg text-black font-bold">Delivery Date</h1>
-                  <h3><span className="font-medium">Date: </span>21 feb 2023</h3>
-                  <h3><span className="font-medium">Time: </span>09-10 pm</h3>
+                  <h3><span className="font-medium">Date: </span>{formatDate(details.delivery_date.date)}</h3>
+                  <h3><span className="font-medium">Time: </span>{details.delivery_date.time}</h3>
                 </div>
               </div>
 
@@ -77,8 +124,8 @@ function OrderDetails() {
               <div className="border border-emerald-100 mt-3"></div>
 
               <div className="mt-2 sm:flex space-y-3 sm:space-y-0 items-center justify-between">
-                <AddressDetails latLon={detailsData.latLon} name={'Pickup'} address={detailsData.pickup_address} />
-                <AddressDetails latLon={detailsData.latLon} name={'Delivery'} address={detailsData.delivery_address} />
+                <AddressDetails  name={'Pickup'} address={details.pickup_address} />
+                <AddressDetails  name={'Delivery'} address={details.delivery_address} />
               </div>
 
 
