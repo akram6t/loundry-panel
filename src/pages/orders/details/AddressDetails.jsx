@@ -6,8 +6,8 @@ import React from 'react';
 const AddressDetails = ({ address, name, }) => {
   const latitude = address?.latlon?.latitude;
   const longitude = address?.latlon?.longitude;
-  const zoom = 16;
-  const mapType = 'satellite'
+  const zoom = 21;
+  const mapType = 'k'
 
   const mapsLink = `https://www.google.com/maps?q=${latitude},${longitude}&z=${zoom}&t=${mapType}`;
 

@@ -131,7 +131,7 @@ function OrderDetails() {
 
               {/* divider */}
               <div className="border border-emerald-100 mt-3 mb-3"></div>
-              <ServicesTables data={detailsData} />
+              <ServicesTables data={details} />
 
 
             </div>
@@ -141,14 +141,14 @@ function OrderDetails() {
 
             <div>
                 <h1 className="font-semibold text-lg mb-2">Payment Details</h1>
-                  <h2 className="flex items-center justify-between">Sub Total: <span className="font-semibold">₹ {detailsData.amount}</span></h2>
-                  <h2 className="flex items-center justify-between">Service Fee: <span className="font-semibold">₹ {detailsData.service_fee}</span></h2>
+                  <h2 className="flex items-center justify-between">Sub Total: <span className="font-semibold">₹ {details.amount}</span></h2>
+                  <h2 className="flex items-center justify-between">Service Fee: <span className="font-semibold">₹ {details.service_fee}</span></h2>
                   {
-                    detailsData.addons?.map((item, index) => (
+                    details?.addons?.map((item, index) => (
                       <h2 key={index} className="flex items-center justify-between">{item.name}: <span className="font-semibold">₹ {item.price}</span></h2>
                     ))
                   }
-                  <h2 className="flex items-center justify-between">Grand Total: <span className="font-semibold">₹ {detailsData.amount + detailsData.service_fee + (detailsData?.addons?.reduce((total, addon) => total + addon.price, 0) || 0)}</span></h2>
+                  <h2 className="flex items-center justify-between">Grand Total: <span className="font-semibold">₹ {details.amount + details.service_fee + (details?.addons?.reduce((total, addon) => total + addon.price, 0) || 0)}</span></h2>
                 </div>
 
                 
@@ -159,10 +159,10 @@ function OrderDetails() {
 
               <div className="mt-4 flex-1"> {/* list */}
                 {/* item */}
-                <div className="bg-gray-100 border p-2 rounded-md">
-                  <h2 className="font-semibold">₹ {32}</h2>
-                  <h5>04 feb 2023 [Cash]</h5>
-                </div>
+                {/* <div className="bg-gray-100 border p-2 rounded-md"> */}
+                  {/* <h2 className="font-semibold">₹ {32}</h2> */}
+                  {/* <h5>04 feb 2023 [Cash]</h5> */}
+                {/* </div> */}
                 {/* item */}
               </div>
 
