@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import Navbar from "./../../components/Navbar/Index";
-import { BASH_URL, Collections, DATE_ACC_DESC, POST_MEDIA, URL_GET_LIST, URL_POST_MEDIA, routes } from "../../utils/Constant";
+import { Collections, DATE_ACC_DESC, POST_MEDIA, URL_GET_LIST, URL_POST_MEDIA, routes } from "../../utils/Constant";
 import { useOutletContext, Link, useParams } from "react-router-dom";
 import Linking from "../../components/Other/Linking";
 import LINKING_DATA from "../../data/linking_data";
@@ -11,6 +11,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import ProgressBar from "../../components/Other/ProgressBar";
 import RainBowProgressBar from "../../components/Other/RainBowProgressBar";
+import { ImageItentifier } from "../../utils/ImageIdentifier";
 
 function Media() {
     const [mediaList, setMediaList] = useState([]);
@@ -148,7 +149,7 @@ function Media() {
                                     <div className="h-32 rounded group mt-2">
                                         <img
                                             className="w-full h-full object-contain"
-                                            src={BASH_URL + item.media}
+                                            src={ImageItentifier(item.media)}
                                         ></img>
                                     </div>
                                 </div>

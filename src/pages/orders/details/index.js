@@ -11,7 +11,7 @@ import { Collections, URL_GET_LIST } from "../../../utils/Constant";
 import axios from "axios";
 import { formatDate } from "../../../utils/FormatDate";
 import formatTime from "../../../utils/FormatTime";
-import ProgressBar from "./../../../components/Other/ProgressBar";
+import AppIndicator from "../../../components/Other/AppIndicator";
 
 function OrderDetails() {
   const [sidebarToggle] = useOutletContext();
@@ -62,9 +62,7 @@ function OrderDetails() {
 
   if(details == null){
     return(
-      <div className="bg-slate-100 flex items-center justify-center h-screen w-full">
-        <ProgressBar/>
-      </div>
+      <AppIndicator/>
     );
   }
 

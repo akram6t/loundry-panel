@@ -35,7 +35,7 @@ const  routes = {
 
 }
 
-export const BASH_URL = 'https://fixed-swamp-lingonberry.glitch.me';
+export const BASE_URL = 'https://fixed-swamp-lingonberry.glitch.me';
 
 const URL_GET_LIST = (params) => {
     const queryParams = new URLSearchParams(params);

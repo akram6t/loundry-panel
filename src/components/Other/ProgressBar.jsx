@@ -1,6 +1,6 @@
 import React from 'react';
 
-const LoadingSpinner = () => {
+const ProgressBar = () => {
   return (
     <div role="status" className="w-fit flex px-2 items-center justify-center">
       <svg
@@ -25,4 +25,4 @@ const LoadingSpinner = () => {
   );
 };
 
-export default LoadingSpinner;
+export default ProgressBar;
