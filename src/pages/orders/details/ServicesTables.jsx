@@ -1,6 +1,7 @@
 import React from 'react';
 import Datatables from './../../../components/Datatables/Table'
 import TableCell from './../../../components/Datatables/TableCell'
+import { ImageItentifier } from '../../../utils/ImageIdentifier';
 
 const ServicesTables = ({data}) => {
   return (
@@ -25,7 +26,7 @@ const ServicesTables = ({data}) => {
             </TableCell>
             <TableCell dataLabel="IMAGE" showLabel={true}>
               <span className="font-medium text-sm text-gray-900">
-                <img src={row.image} className="w-10 h-10" />
+                <img src={ImageItentifier(row.image)} className="w-10 h-10" />
               </span>
             </TableCell>
             <TableCell dataLabel="NAME" showLabel={true}>

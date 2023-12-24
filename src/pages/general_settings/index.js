@@ -48,6 +48,38 @@ function GeneralSettings() {
     getStore();
   }, []);
 
+  const handleChangeValue = (name, value) => {
+
+    if(name.includes('delivery_partner:')){
+      let n = name.replace('delivery_partner:', '');
+      setStore({
+        ...store,
+        delivery_partner:{
+          [n]: value
+        }
+      })
+
+      return;
+    }
+
+    if(name === 'latitude' || name === 'longitude'){
+      setStore({
+        ...store,
+        latlon: {
+          ...store.latlon,
+          [name]: value
+        }
+      });
+      return;
+    }
+
+    setStore({
+      ...store,
+      [name]: value
+    });
+
+  }
+
 
   if(store == null){
     return(
@@ -96,6 +128,7 @@ function GeneralSettings() {
                 </label>
                 <input
                   value={store?.name}
+                  onChange={(e) => handleChangeValue('name', e.target.value)}
                   type="text"
                   className="text-md placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1"
                   placeholder="Enter Name"
@@ -111,6 +144,7 @@ function GeneralSettings() {
                 </label>
                 <input
                     value={store?.email}
+                    onChange={(e) => handleChangeValue('email', e.target.value)}
                   id="inputWithIcon"
                   type="text"
                   name="inputWithIcon"
@@ -132,6 +166,7 @@ function GeneralSettings() {
                 </div>
                 <input
                 value={store?.phone_number}
+                onChange={(e) => handleChangeValue('phone_number', e.target.value)}
                   id="inputWithIcon"
                   type="text"
                   name="inputWithIcon"
@@ -154,6 +189,7 @@ function GeneralSettings() {
                 </div>
                 <input
                 value={store?.whatsapp_number}
+                onChange={(e) => handleChangeValue('whatsapp_number', e.target.value)}
                   id="inputWithIcon"
                   type="text"
                   name="inputWithIcon"
@@ -171,6 +207,7 @@ function GeneralSettings() {
                 </label>
                 <input
                     value={store?.address}
+                    onChange={(e) => handleChangeValue('address', e.target.value)}
                   id="inputWithIcon"
                   type="text"
                   name="inputWithIcon"
@@ -187,6 +224,7 @@ function GeneralSettings() {
                 </label>
                 <input
                   value={store?.latlon?.latitude}
+                  onChange={(e) => handleChangeValue('latitude', e.target.value)}
                   id="inputWithIcon"
                   type="number"
                   name="inputWithIcon"
@@ -203,6 +241,7 @@ function GeneralSettings() {
                 </label>
                 <input
                   value={store?.latlon?.longitude}
+                  onChange={(e) => handleChangeValue('longitude', e.target.value)}
                   id="inputWithIcon"
                   type="number"
                   name="inputWithIcon"
@@ -223,6 +262,7 @@ function GeneralSettings() {
                 </div>
                 <input
                 value={store?.service_fee}
+                onChange={(e) => handleChangeValue('service_fee', e.target.value)}
                   id="inputWithIcon"
                   type="number"
                   name="inputWithIcon"
@@ -239,9 +279,10 @@ function GeneralSettings() {
                   <span className="text-red-600 font-bold ml-2">*</span>
                 </label>
                 <input
-                  //   value={'user1234'}
+                    value={store?.distance}
+                    onChange={(e) => handleChangeValue('distance', e.target.value)}
                   id="inputWithIcon"
-                  type="text"
+                  type="number"
                   name="inputWithIcon"
                   placeholder="Distance between customer to store"
                   className="text-md placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1"
@@ -300,6 +341,8 @@ function GeneralSettings() {
                 </label>
                 <input
                   id="defaultInput"
+                  value={store?.delivery_partner?.name}
+                  onChange={(e) => handleChangeValue('delivery_partner:name', e.target.value)}
                   type="text"
                   name="defaultInput"
                   className="text-md placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1"
@@ -315,7 +358,8 @@ function GeneralSettings() {
                   <span className="text-red-600 font-bold ml-2">*</span>
                 </label>
                 <input
-                  value={'Delivery Man'}
+                  value={store?.delivery_partner?.title}
+                  onChange={(e) => handleChangeValue('delivery_partner:title', e.target.value)}
                   id="inputWithIcon"
                   type="text"
                   name="inputWithIcon"
@@ -337,6 +381,8 @@ function GeneralSettings() {
                 </div>
                 <input
                   id="inputWithIcon"
+                  value={store?.delivery_partner?.phone_number}
+                  onChange={(e) => handleChangeValue('delivery_partner:phone_number', e.target.value)}
                   type="text"
                   name="inputWithIcon"
                   // onChange={(e) => setEmail(e.target.value)}
@@ -357,6 +403,8 @@ function GeneralSettings() {
                   <span>+91 </span>
                 </div>
                 <input
+                value={store?.delivery_partner?.whatsapp_number}
+                onChange={(e) => handleChangeValue('delivery_partner:whatsapp_number', e.target.value)}
                   id="inputWithIcon"
                   type="text"
                   name="inputWithIcon"
