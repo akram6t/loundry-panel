@@ -13,21 +13,43 @@ import AddonsTable from "./AddonsTable";
 import { Collections, DATE_ACC_DESC, URL_GET_LIST } from "../../utils/Constant";
 import axios from "axios";
 import Modal from "../../components/Other/models/ModelDelete";
+import ModalCreate from "../../components/Other/models/ModalCreate";
+import { status } from "../../data/status";
 
 function Addons() {
-  const [ modalShow, setModalShow ] = useState(false);
-  const [addonsList, setAddonsList ] = useState([]);
+  const [addonsList, setAddonsList] = useState([]);
   const [sidebarToggle] = useOutletContext();
   const [loading, setLoading] = useState(false);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [CUModal, setCUModal] = useState({ status: false });
+
+  const addData = {
+    name: '',
+    price: '',
+    status: status[0].label
+  }
+
+  const collection = Collections.ADDONS;
+
+  const handleChangeValue = (name, value) => {
+    let val = value;
+    setCUModal({
+      ...CUModal,
+      data: {
+        ...CUModal.data,
+        [name]: val
+      }
+    })
+  }
 
   const getAddons = async () => {
+    setAddonsList([]);
     setLoading(true);
     const params = {
       collection: Collections.ADDONS,
-      sort: JSON.stringify({date: DATE_ACC_DESC.ACCENDING}),
+      sort: JSON.stringify({ date: DATE_ACC_DESC.ACCENDING }),
     }
     try {
       const response = await axios.get(URL_GET_LIST(params));
@@ -35,8 +57,8 @@ function Addons() {
       if (response.status === 200) {
         console.log(response.data);
         setLoading(false);
-        const {status, data, message} = response.data;
-        if(status){
+        const { status, data, message } = response.data;
+        if (status) {
           setAddonsList([...data]);
         }
       } else {
@@ -87,9 +109,9 @@ function Addons() {
           <div className="py-5 flex items-center justify-between">
             <div className="flex flex-col gap-y-2">
               <h2 className="font-bold text-3xl">Addons</h2>
-              <Linking currentPage="Services" data={LINKINGDATA().ADDONS}/>
+              <Linking currentPage="Services" data={LINKINGDATA().ADDONS} />
             </div>
-            <button className="bg-emerald-600 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-md">
+            <button onClick={() => setCUModal({ status: true, collection: collection, data: { ...addData } })} className="bg-emerald-600 transition-all hover:bg-emerald-700 active:bg-emerald-800 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-md">
               + Add New
             </button>
           </div>
@@ -99,15 +121,16 @@ function Addons() {
 
             {/* FilterBar Start */}
             <div className="flex items-center justify-between pb-3">
-              <EntryOptions onChange={(value) => setItemsPerPage(value)}/>
+              <EntryOptions onChange={(value) => setItemsPerPage(value)} />
               <div className="flex flex-wrap items-center justify-end gap-y-2 md:flex md:items-center md:gap-x-4">
-                <SearchTable searchTerm={searchTerm} handleSearch={(e) => handleSearch(e)}/>
+                <SearchTable searchTerm={searchTerm} handleSearch={(e) => handleSearch(e)} />
                 {/* <FilterDropDown filter={dateFilter} setFilter={(value) => setDateFilter(value)}/> */}
               </div>
             </div>
             {/* Filterbar End */}
 
             <AddonsTable
+              edit={(data) => setCUModal({ status: true, collection: collection, data: { ...data } })}
               onRefresh={() => getAddons()}
               collection={Collections.ADDONS}
               loading={loading}
@@ -120,6 +143,67 @@ function Addons() {
           </div>
         </div>
       </main>
+      <ModalCreate title='Addon' onRefresh={() => getAddons()} isModalVisible={CUModal} setModalVisibility={(obj) => setCUModal(obj)}>
+        {/* input start */}
+        <div className="relative">
+          <label className="font-bold text-sm text-gray-600">
+            Addon Name
+            <span className="text-red-600 font-bold ml-2">*</span>
+          </label>
+          <input
+            value={CUModal?.data?.name}
+            onChange={(e) => handleChangeValue('name', e.target.value)}
+            id="inputWithIcon"
+            type="text"
+            name="inputWithIcon"
+            className="text-md placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1"
+            placeholder="Enter addon name"
+          />
+        </div>
+        {/* input end */}
+        {/* })} */}
+        {/* input start */}
+        <div className="relative">
+          <label className="font-bold text-sm text-gray-600">
+            Addon price
+            <span className="text-red-600 font-bold ml-2">*</span>
+          </label>
+          <input
+            value={CUModal?.data?.price}
+            onChange={(e) => handleChangeValue('price', e.target.value)}
+            id="inputWithIcon"
+            type="number"
+            name="inputWithIcon"
+            className="text-md placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1"
+            placeholder="Enter addon price"
+          />
+        </div>
+        {/* input end */}
+
+        {/* input start */}
+        {
+          CUModal?.data?._id &&
+          <div className="relative">
+            <label className="font-bold text-sm text-gray-600">
+              Status
+              <span className="text-red-600 font-bold ml-2">*</span>
+            </label>
+            <select
+              value={CUModal?.data?.status}
+              onChange={(e) => handleChangeValue('status', e.target.value)}
+              className="text-md placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1">
+              {
+                status.map(item => (
+                  <option value={item.label}>{item.label}</option>
+                ))
+              }
+            </select>
+
+          </div>
+
+        }
+        {/* input end */}
+      </ModalCreate>
     </>
   );
 }

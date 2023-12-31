@@ -1,14 +1,31 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Datatables from "../../components/Datatables/Table";
 import TableCell from "../../components/Datatables/TableCell";
 import { status } from "../../data/status";
-import { routes } from "../../utils/Constant";
+import { ImageItentifier } from "../../utils/ImageIdentifier";
+import DeleteModal from './../../components/Other/models/ModelDelete';
 // import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 // import { faPencil, faRemove } from "@fortawesome/free-solid-svg-icons";
 
-function ServicesTable({ loading, dataHeader, data, currentPage, itemsPerPage }) {
+function ServicesTable({ onRefresh, loading, dataHeader, data, currentPage, itemsPerPage, collection }) {
+  const [modalVisible, setModalVisible] = useState({ status: false });
+
+  const deleteData = (id, title) => {
+    if (id) {
+      setModalVisible(
+        {
+          id: id,
+          title: title,
+          status: true,
+          collection: collection
+        }
+      )
+    }
+  };
+
   return (
+    <>
     <Datatables loading={loading} dataHeader={dataHeader}>
       {data?.map((row, index) => (
         <tr
@@ -22,7 +39,7 @@ function ServicesTable({ loading, dataHeader, data, currentPage, itemsPerPage })
           </TableCell>
           <TableCell dataLabel="IMAGE" showLabel={true}>
             <span className="font-medium text-sm text-gray-900">
-              <img src={row.image} className="w-14 h-14"/>
+              <img src={ImageItentifier(row.image)} className="w-14 h-14"/>
             </span>
           </TableCell>
           <TableCell dataLabel="NAME" showLabel={true}>
@@ -50,14 +67,24 @@ function ServicesTable({ loading, dataHeader, data, currentPage, itemsPerPage })
               <Link to={`/service/edit/${row._id}`} className="bg-black text-gray-100 px-3 py-2 rounded-lg shadow-lg text-sm transition-all hover:bg-opacity-80 active:bg-opacity-50">
                 Edit
               </Link>
-              <Link to={`/customers/${row.uid}`} className="bg-red-600 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-sm transition-all hover:bg-opacity-80 active:bg-opacity-50">
-                Delete
-              </Link>
+              <button
+                  onClick={() => deleteData(row._id, row.name)}
+                  className="bg-red-600 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-sm transition-all hover:bg-opacity-80 active:bg-opacity-50"
+                >
+                  Delete
+                </button>
             </span>
             </TableCell>
         </tr>
       ))}
     </Datatables>
+    
+    <DeleteModal
+        onRefresh={() => onRefresh()}
+        isModalVisible={modalVisible}
+        setModalVisibility={(obj) => setModalVisible(obj)}
+      />
+    </>
   );
 }
 

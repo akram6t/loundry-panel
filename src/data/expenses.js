@@ -82,14 +82,18 @@ export const expensesCategoryHeader = [
         label: 'Category Type'
     },
     {
+        key: 'status',
+        label: 'Status'
+    },
+    {
         key: 'action',
         label: 'Action'
     }
 ]
 
 export const categoryType = [
-    { label: 'Assets', color: 'bg-green-300' },
-    { label: 'Liability', color: 'bg-teal-300' }
+    { label: 'Assets', color: 'bg-purple-600' },
+    { label: 'Liability', color: 'bg-teal-600' }
 ]
 
 export const expensesCategoryData = [

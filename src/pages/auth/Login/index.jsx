@@ -1,21 +1,34 @@
-import { faFacebook, faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { faEnvelope, faLock } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import ProgressBar from "../../../components/Other/ProgressBar";
+import { toast } from "react-toastify";
+import { routes } from "../../../utils/Constant";
 
-function LoginIndex() {
+function LoginIndex({setToken}) {
+  const e = 'admin@gmail.com';
+  const p = '123456';
   const navigate = useNavigate();
   const [error, setError] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const handleSubmit = () => {
-    setError(false);
-    console.log(email);
-    console.log(password);
+  const handleSubmit = (event) => {
+    event.preventDefault();
     setLoading(true);
-    navigate("/");
+    setError(false);
+    if(email === e && password === p){
+      setToken(true);
+      setError(false);
+      setLoading(false);
+      navigate(routes.DASHBOARD);
+      sessionStorage.setItem('token', 'token');
+    }else{
+      setLoading(false);
+      setError(true);
+      toast.error('Email or Password is Wrong.');
+    }
   };
   const LoginImage =
     "https://edp.raincode.my.id/static/media/login.cc0578413db10119a7ff.png";
@@ -36,7 +49,7 @@ function LoginIndex() {
                   Login to Your Account
                 </h1>
                 <span className="text-sm">
-                  Free access to EDP Online services
+                  
                 </span>
               </div>
             </div>
@@ -53,7 +66,7 @@ function LoginIndex() {
               <div className="hidden md:block relative mt-10 h-px bg-gray-300">
                 <div className="absolute left-0 top-0 flex justify-center w-full -mt-2">
                   <span className="bg-white px-4 text-xs text-gray-500 uppercase">
-                    Login dengan e-mail atau username
+                    Login using email, username and password
                   </span>
                 </div>
               </div>
@@ -78,7 +91,7 @@ function LoginIndex() {
                         name="email"
                         onChange={(e) => setEmail(e.target.value)}
                         className="text-sm placeholder-gray-500 pl-10 pr-4 rounded-lg border border-gray-400 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400"
-                        placeholder="E-Mail Address"
+                        placeholder="Email or Username"
                       />
                     </div>
                     {error?.email && (
@@ -112,7 +125,7 @@ function LoginIndex() {
                   </div>
 
                   {/* Forgot Password Link */}
-                  <div className="flex items-center mb-6 -mt-2 md:-mt-4">
+                  {/* <div className="flex items-center mb-6 -mt-2 md:-mt-4">
                     <div className="flex ml-auto">
                       <Link
                         to=""
@@ -121,10 +134,10 @@ function LoginIndex() {
                         }}
                         className="inline-flex font-semibold text-xs sm:text-sm text-emerald-500 hover:text-emerald-700"
                       >
-                        Lupa password?
+                        Forgot Password?
                       </Link>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* Button Login */}
                   <div className="flex w-full">
@@ -134,7 +147,7 @@ function LoginIndex() {
                       className="flex items-center justify-center focus:outline-none text-white text-sm bg-emerald-500 hover:bg-emerald-700 rounded-lg md:rounded md:py-2 py-3 w-full transition duration-150 ease-in"
                     >
                       <span className="mr-2 md:uppercase">
-                        {loading ? "Processing...." : "Login"}
+                        {loading ? <ProgressBar/> : "Login"}
                       </span>
                     </button>
                   </div>
@@ -142,16 +155,16 @@ function LoginIndex() {
               </div>
 
               {/* Sparator */}
-              <div className="relative mt-6 h-px bg-gray-300">
+              {/* <div className="relative mt-6 h-px bg-gray-300">
                 <div className="absolute left-0 top-0 flex justify-center w-full -mt-2">
                   <span className="bg-white px-4 text-xs text-gray-500 uppercase">
                     OR
                   </span>
                 </div>
-              </div>
+              </div> */}
 
               {/* Social Button */}
-              <div className="flex justify-between w-full mt-6">
+              {/* <div className="flex justify-between w-full mt-6">
                 <button
                   disabled={loading}
                   type="submit"
@@ -170,11 +183,11 @@ function LoginIndex() {
                   <FontAwesomeIcon icon={faFacebook} />
                   <span className="mr-2 flex-1">Login with Facebook</span>
                 </button>
-              </div>
+              </div> */}
               {/* End Social Button */}
 
               {/* Register Link */}
-              <div className="flex justify-center items-center  my-6 md:mb-0">
+              {/* <div className="flex justify-center items-center  my-6 md:mb-0">
                 <Link
                   to="/auth/register"
                   className="inline-flex items-center font-bold text-emerald-500 hover:text-emerald-700 text-xs text-center"
@@ -194,7 +207,7 @@ function LoginIndex() {
                   </span>
                   <span className="ml-2">Belum punya akun?</span>
                 </Link>
-              </div>
+              </div> */}
               {/* End Register Link */}
             </div>
           </div>

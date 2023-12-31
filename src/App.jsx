@@ -1,6 +1,6 @@
-import React from "react";
-import { Route, Routes } from "react-router-dom";
 
+import React, { useEffect, useState } from "react";
+import { Route, Routes, Navigate } from "react-router-dom";
 import Dashboard from "./pages/dashboard/index";
 import AuthLayout from "./components/Layout/AuthLayout";
 import GuestLayout from "./components/Layout/GuestLayout";
@@ -8,7 +8,6 @@ import Login from "./pages/auth/Login";
 import Blank from "./pages/Blank";
 import NotFound from "./pages/NotFound";
 import Form from "./pages/Form";
-import RegisterIndex from "./pages/auth/Register";
 import Orders from './pages/orders/orders/index';
 import { routes } from "./utils/Constant";
 import OrderDetails from "./pages/orders/details";
@@ -29,24 +28,43 @@ import ApplicationSettings from "./pages/application_settings";
 import TC from "./pages/term_and_conditions";
 import OrdersStatus from "./pages/orders_status";
 import OrderDateTime from "./pages/order_date_timing";
-import ServicesEdit from "./pages/services_edit";
 import ServicesCreate from "./pages/services_create";
 import Banners from "./pages/banners";
+import { useNavigate } from "react-router-dom";
+import AppIndicator from "./components/Other/AppIndicator";
 
 function App() {
+  // const navigate = useNavigate();
+  const [token, setToken] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const t = sessionStorage.getItem('token');
+    console.log(t);
+    if(t){
+      setToken(true);
+    }
+    setLoading(false);
+  }, []);
+
+  if(loading){
+    return <AppIndicator/>
+  }
+
   return (
     <Routes>
-      <Route path="/" element={<AuthLayout />}>
-        <Route path="/" element={<Dashboard />}></Route>
+      <Route path="/" element={token ? <AuthLayout /> : <Navigate to={routes.LOGIN} replace/>}>
+        <Route path="/" element={ <Dashboard/> }></Route>
         <Route path={routes.ORDERS} element={<Orders />}></Route>
         <Route path={routes.CUSTOMERS} element={<Customers />}></Route>
+        <Route path={routes.CUSTOMERS_CREATE} element={<CustomerDetails />}></Route>
         <Route path={routes.CUSTOMERS_EDIT} element={<CustomerDetails />}></Route>
 
         <Route path={routes.ORDER_DETAILS} element={<OrderDetails />}></Route>
         <Route path={routes.ORDER_CREATE} element={<OrderDetails />}></Route>
 
         <Route path={routes.SERVICES} element={<Services />}></Route>
-        <Route path={routes.SERVICES_EDIT} element={<ServicesEdit />}></Route>
+        <Route path={routes.SERVICES_EDIT} element={<ServicesCreate />}></Route>
         <Route path={routes.SERVICES_CREATE} element={<ServicesCreate />}></Route>
         <Route path={routes.SERVICES_TYPE} element={<ServicesTypes />}></Route>
         <Route path={routes.ADDONS} element={<Addons />}></Route>
@@ -73,8 +91,8 @@ function App() {
         <Route path="/profile" element={<Blank />}></Route>
       </Route>
       <Route path="/auth" element={<GuestLayout />}>
-        <Route path="/auth/login" element={<Login />}></Route>
-        <Route path="/auth/register" element={<RegisterIndex />}></Route>
+        <Route path="/auth/login" element={<Login setToken={(token) => setToken(token)} />}></Route>
+        {/* <Route path="/auth/register" element={<RegisterIndex />}></Route> */}
       </Route>
     </Routes>
   );

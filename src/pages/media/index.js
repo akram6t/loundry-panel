@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import Navbar from "./../../components/Navbar/Index";
-import { Collections, DATE_ACC_DESC, POST_MEDIA, URL_GET_LIST, URL_POST_MEDIA, routes } from "../../utils/Constant";
+import { Collections, DATE_ACC_DESC, POST_MEDIA, URL_DELETE_DOCUMENT, URL_GET_LIST, URL_POST_MEDIA, routes } from "../../utils/Constant";
 import { useOutletContext, Link, useParams } from "react-router-dom";
 import Linking from "../../components/Other/Linking";
 import LINKING_DATA from "../../data/linking_data";
@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import ProgressBar from "../../components/Other/ProgressBar";
 import RainBowProgressBar from "../../components/Other/RainBowProgressBar";
 import { ImageItentifier } from "../../utils/ImageIdentifier";
+import DeleteModal from "../../components/Other/models/ModelDelete";
 
 function Media() {
     const [mediaList, setMediaList] = useState([]);
@@ -19,6 +20,7 @@ function Media() {
     const [sidebarToggle] = useOutletContext();
     const [selectedImage, setSelectedImage] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [isModalVisible, setModalVisibility] = useState({status: false});
 
     const handleImageChange = (event) => {
         console.log(event.target.files);
@@ -56,6 +58,10 @@ function Media() {
     useEffect(() => {
         getMedia();
     }, []);
+
+    const handleDeleteMedia = async (item) => {
+      setModalVisibility({status: true, id: item._id, collection: Collections.MEDIA});
+    }
 
     const addMedia = async () => {
         if (selectedImage == null) {
@@ -139,11 +145,10 @@ function Media() {
                         {
                             loading && <RainBowProgressBar />
                         }
-
                         <div className="p-3 items-center grid gap-x-5 gap-y-5 grid-cols-[repeat(auto-fill,minmax(70px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(120px,1fr))]">
                             {mediaList?.map((item) => (
                                 <div className="w-full relative border border-gray-300 px-2 pt-2">
-                                    <span className="absolute cursor-pointer transition-all hover:opacity-50 active:opacity-30 top-0 right-2">
+                                    <span onClick={() => handleDeleteMedia(item)} className="absolute cursor-pointer transition-all hover:opacity-50 active:opacity-30 top-0 right-2">
                                         <FontAwesomeIcon color="red" icon={faRemove} />
                                     </span>
                                     <div className="h-32 rounded group mt-2">
@@ -158,6 +163,8 @@ function Media() {
                     </div>
                 </div>
             </main>
+
+            <DeleteModal isModalVisible={isModalVisible} setModalVisibility={(obj) => setModalVisibility(obj)} onRefresh={() => getMedia()}/>
         </>
     );
 }

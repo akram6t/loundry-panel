@@ -1,22 +1,26 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "./../../components/Navbar/Index";
-import { Collections, URL_GET_LIST, routes } from "../../utils/Constant";
+import Navbar from "../../components/Navbar/Index";
+import { Collections, URL_GET_LIST, URL_POST_DOCUMENT, routes } from "../../utils/Constant";
 import { useOutletContext, Link, useParams } from "react-router-dom";
 import Linking from "../../components/Other/Linking";
 import LINKING_DATA from "../../data/linking_data";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPhone, faSave, faUpload } from "@fortawesome/free-solid-svg-icons";
 import { status } from "../../data/status";
-import { useSelector }  from 'react-redux';
+import { useSelector } from 'react-redux';
 import axios from "axios";
 import AppIndicator from "../../components/Other/AppIndicator";
 import { ImageItentifier } from "../../utils/ImageIdentifier";
+import ModalMedia from './../../components/Other/models/ModalMedia';
+import { toast } from "react-toastify";
+import ProgressBar from "../../components/Other/ProgressBar";
 
 function GeneralSettings() {
+  const [showMedia, setShowMedia] = useState(false);
   const [sidebarToggle] = useOutletContext();
   const [loading, setLoading] = useState(false);
   const order_status = useSelector((state) => state.orderstatus.value);
-  const [ store, setStore ] = useState(null);
+  const [store, setStore] = useState(null);
 
   const getStore = async () => {
     setLoading(true);
@@ -29,8 +33,8 @@ function GeneralSettings() {
 
       if (response.status === 200) {
         setLoading(false);
-        const {status, data, message} = response.data;
-        if(status){
+        const { status, data, message } = response.data;
+        if (status) {
           setStore(data[0]);
           // console.log(data);
         }
@@ -48,13 +52,40 @@ function GeneralSettings() {
     getStore();
   }, []);
 
+  const handleUpdate = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.post(URL_POST_DOCUMENT, {
+        collection: Collections.STORE,
+        data: { ...store }
+      });
+
+      if (response.status === 200) {
+        console.log(response.data);
+        setLoading(false);
+        const { status } = response.data;
+        if (status) {
+          toast.success(`Settings Updated`)
+        }
+      } else {
+        toast.error(response.statusText);
+        console.error(`Error crud: ${Collections.STORE}`, response.statusText);
+      }
+    } catch (error) {
+      setLoading(false);
+      toast.error(error.toString());
+      console.error(`Error crud: ${Collections.store}`, error);
+    }
+  }
+
   const handleChangeValue = (name, value) => {
 
-    if(name.includes('delivery_partner:')){
+    if (name.includes('delivery_partner:')) {
       let n = name.replace('delivery_partner:', '');
       setStore({
         ...store,
-        delivery_partner:{
+        delivery_partner: {
+          ...store?.delivery_partner,
           [n]: value
         }
       })
@@ -62,28 +93,36 @@ function GeneralSettings() {
       return;
     }
 
-    if(name === 'latitude' || name === 'longitude'){
+    if (name === 'latitude' || name === 'longitude') {
       setStore({
         ...store,
         latlon: {
           ...store.latlon,
-          [name]: value
+          [name]: parseFloat(value)
         }
       });
       return;
     }
 
-    setStore({
-      ...store,
-      [name]: value
-    });
+    if (name === 'service_fee' || name === 'cancelledStep' || name === 'distance') {
+      setStore({
+        ...store,
+        [name]: parseFloat(value)
+      });
+    } else {
+      setStore({
+        ...store,
+        [name]: value
+      });
+
+    }
 
   }
 
 
-  if(store == null){
-    return(
-      <AppIndicator/>
+  if (store == null) {
+    return (
+      <AppIndicator />
     );
   }
 
@@ -114,7 +153,7 @@ function GeneralSettings() {
                 </label>
                 <div className="mt-2 flex">
                   <img className="w-20 h-20" src={ImageItentifier(store?.logo)}></img>
-                  <button className="m-3 mb-5 hover:bg-opacity-80 active:bg-opacity-60 transition-all bg-black text-gray-100 px-3 py-2 rounded-lg shadow-lg text-sm">
+                  <button onClick={() => setShowMedia(true)} className="m-3 mb-5 hover:bg-opacity-80 active:bg-opacity-60 transition-all bg-black text-gray-100 px-3 py-2 rounded-lg shadow-lg text-sm">
                     Change
                   </button>
                 </div>
@@ -143,8 +182,8 @@ function GeneralSettings() {
                   <span className="text-red-600 font-bold ml-2">*</span>
                 </label>
                 <input
-                    value={store?.email}
-                    onChange={(e) => handleChangeValue('email', e.target.value)}
+                  value={store?.email}
+                  onChange={(e) => handleChangeValue('email', e.target.value)}
                   id="inputWithIcon"
                   type="text"
                   name="inputWithIcon"
@@ -165,8 +204,8 @@ function GeneralSettings() {
                   <span className="text-gray-600">+91 </span>
                 </div>
                 <input
-                value={store?.phone_number}
-                onChange={(e) => handleChangeValue('phone_number', e.target.value)}
+                  value={store?.phone_number}
+                  onChange={(e) => handleChangeValue('phone_number', e.target.value)}
                   id="inputWithIcon"
                   type="text"
                   name="inputWithIcon"
@@ -188,8 +227,8 @@ function GeneralSettings() {
                   <span className="text-gray-600">+91 </span>
                 </div>
                 <input
-                value={store?.whatsapp_number}
-                onChange={(e) => handleChangeValue('whatsapp_number', e.target.value)}
+                  value={store?.whatsapp_number}
+                  onChange={(e) => handleChangeValue('whatsapp_number', e.target.value)}
                   id="inputWithIcon"
                   type="text"
                   name="inputWithIcon"
@@ -206,8 +245,8 @@ function GeneralSettings() {
                   <span className="text-red-600 font-bold ml-2">*</span>
                 </label>
                 <input
-                    value={store?.address}
-                    onChange={(e) => handleChangeValue('address', e.target.value)}
+                  value={store?.address}
+                  onChange={(e) => handleChangeValue('address', e.target.value)}
                   id="inputWithIcon"
                   type="text"
                   name="inputWithIcon"
@@ -249,7 +288,7 @@ function GeneralSettings() {
                   className="text-md placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1"
                 />
               </div>
-                                    {/* input start */}
+              {/* input start */}
               <div className="relative">
                 <label className="font-bold text-sm text-gray-600">
                   Service Fee
@@ -261,8 +300,8 @@ function GeneralSettings() {
                   <span className="font-bold text-gray-600">₹</span>
                 </div>
                 <input
-                value={store?.service_fee}
-                onChange={(e) => handleChangeValue('service_fee', e.target.value)}
+                  value={store?.service_fee}
+                  onChange={(e) => handleChangeValue('service_fee', e.target.value)}
                   id="inputWithIcon"
                   type="number"
                   name="inputWithIcon"
@@ -279,8 +318,8 @@ function GeneralSettings() {
                   <span className="text-red-600 font-bold ml-2">*</span>
                 </label>
                 <input
-                    value={store?.distance}
-                    onChange={(e) => handleChangeValue('distance', e.target.value)}
+                  value={store?.distance}
+                  onChange={(e) => handleChangeValue('distance', e.target.value)}
                   id="inputWithIcon"
                   type="number"
                   name="inputWithIcon"
@@ -289,35 +328,37 @@ function GeneralSettings() {
                 />
               </div>
               {/* input end */}
-               {/* input start */}
-       <div className="">
-         <label htmlFor="defaultInput" className="font-bold text-sm text-gray-600">
-           <div>
-            <h5>Order cancelled from </h5>
-            <h5>{order_status[0]?.tag} to
-              <span className='ml-1 text-red-500'>*</span>
-           </h5>
-           </div>
-         </label>
-         <select
-           className="text-md placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1">
-             <option value={-1}>Not Cancellable</option>
-            {
-                order_status?.map((item, index) => {
-                    return(
+              {/* input start */}
+              <div className="">
+                <label htmlFor="defaultInput" className="font-bold text-sm text-gray-600">
+                  <div>
+                    <h5>Order cancelled from </h5>
+                    <h5>{order_status[0]?.tag} to
+                      <span className='ml-1 text-red-500'>*</span>
+                    </h5>
+                  </div>
+                </label>
+                <select
+                value={store?.cancelledStep}
+                onChange={(e) => handleChangeValue('cancelledStep', e.target.value)}
+                  className="text-md placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1">
+                  <option value={-1}>Not Cancellable</option>
+                  {
+                    order_status?.map((item, index) => {
+                      return (
                         <option value={index}>{item.tag}</option>
-                    )
-                })
-            }
-         </select>
-       </div>
-       {/* input end */}
+                      )
+                    })
+                  }
+                </select>
+              </div>
+              {/* input end */}
 
             </div>
 
 
-            <button className="m-3 mb-5 hover:bg-opacity-80 active:bg-opacity-60 transition-all bg-emerald-600 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-sm">
-              Update
+            <button onClick={() => handleUpdate()} className="m-3 mb-5 hover:bg-opacity-80 active:bg-opacity-60 transition-all bg-emerald-600 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-sm">
+              {loading ? <ProgressBar /> : 'Update'}
             </button>
           </div>
           {/* end user details */}
@@ -383,7 +424,7 @@ function GeneralSettings() {
                   id="inputWithIcon"
                   value={store?.delivery_partner?.phone_number}
                   onChange={(e) => handleChangeValue('delivery_partner:phone_number', e.target.value)}
-                  type="text"
+                  type="number"
                   name="inputWithIcon"
                   // onChange={(e) => setEmail(e.target.value)}
                   className="text-md placeholder-gray-500 pl-10 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1"
@@ -403,10 +444,10 @@ function GeneralSettings() {
                   <span>+91 </span>
                 </div>
                 <input
-                value={store?.delivery_partner?.whatsapp_number}
-                onChange={(e) => handleChangeValue('delivery_partner:whatsapp_number', e.target.value)}
+                  value={store?.delivery_partner?.whatsapp_number}
+                  onChange={(e) => handleChangeValue('delivery_partner:whatsapp_number', e.target.value)}
                   id="inputWithIcon"
-                  type="text"
+                  type="number"
                   name="inputWithIcon"
                   // onChange={(e) => setEmail(e.target.value)}
                   className="text-md placeholder-gray-500 pl-10 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1"
@@ -418,8 +459,8 @@ function GeneralSettings() {
             </div>
 
 
-            <button className="m-3 mb-5 hover:bg-opacity-80 active:bg-opacity-60 transition-all bg-emerald-600 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-sm">
-              Update
+            <button onClick={() => handleUpdate()} className="m-3 mb-5 hover:bg-opacity-80 active:bg-opacity-60 transition-all bg-emerald-600 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-sm">
+              {loading ? <ProgressBar /> : 'Update'}
             </button>
           </div>
           {/* end user details */}
@@ -428,6 +469,8 @@ function GeneralSettings() {
 
         </div>
       </main>
+
+      <ModalMedia showMedia={showMedia} setShowMedia={() => setShowMedia(false)} onChangeMedia={(item) => { handleChangeValue('logo', item.media); setShowMedia(false); }} />
     </>
   );
 }

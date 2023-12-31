@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "./../../components/Navbar/Index";
-import { useOutletContext } from "react-router-dom";
+import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import Paginate from "../../components/Datatables/Paginate";
 import filterDate from "../../data/filterdate";
 import FilterDropDown from "../../components/Other/FilterDropDown";
@@ -10,7 +10,7 @@ import EntryOptions from "../../components/Other/EntryOptions";
 import SearchTable from "../../components/Other/SearchTable";
 import CustomerTable from "./CustomersTable";
 import { customersData, customersHeader } from "../../data/customers";
-import { Collections, DATE_ACC_DESC, URL_GET_LIST } from "../../utils/Constant";
+import { Collections, DATE_ACC_DESC, URL_GET_LIST, routes } from "../../utils/Constant";
 import axios from "axios";
 
 function Customers() {
@@ -27,9 +27,9 @@ function Customers() {
     setLoading(true);
     const params = {
       collection: Collections.USERS,
-      filter: JSON.stringify({createdAt: dateFilter.value()}),
-      sort: JSON.stringify({createdAt: DATE_ACC_DESC.DECENDING}),
-      select: JSON.stringify({ status: 1, name: 1, email: 1, mobile: 1, createdAt: 1, uid: 1 })
+      filter: JSON.stringify({date: dateFilter.value()}),
+      sort: JSON.stringify({date: DATE_ACC_DESC.DECENDING}),
+      select: JSON.stringify({ status: 1, name: 1, email: 1, mobile: 1, date: 1, uid: 1 })
     }
     try {
       const response = await axios.get(URL_GET_LIST(params));
@@ -57,7 +57,7 @@ function Customers() {
   const filteredData = customersList.filter(item =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.mobile.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.createdAt.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.date.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.email.toLowerCase().includes(searchTerm.toLowerCase()));
 
@@ -79,8 +79,6 @@ function Customers() {
     setCurrentPage(page);
   };
 
-  const handleDelete = () => { };
-
   return (
     <>
       <main className="h-full">
@@ -95,9 +93,9 @@ function Customers() {
               <h2 className="font-bold text-3xl">Customers</h2>
               <Linking currentPage="Customers" data={LINKINGDATA().CUSTOMER_PAGE}/>
             </div>
-            <button className="bg-emerald-600 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-md">
+            <Link to={routes.CUSTOMERS_CREATE} className="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 transition-all text-gray-100 px-3 py-2 rounded-lg shadow-lg text-md">
               + Add New
-            </button>
+            </Link>
           </div>
           {/* Topbar End */}
 

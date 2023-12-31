@@ -6,10 +6,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import initMenus from "../data/menus.js";
+import { routes } from "../utils/Constant.js";
 
 function Sidebar() {
+  const navigate = useNavigate();
   const [menus, setMenus] = useState(initMenus);
   const [scButton, setScButton] = useState(false);
   const search = useRef("");
@@ -33,6 +35,11 @@ function Sidebar() {
     setMenus(initMenus);
     setScButton(false);
   };
+
+  const logOut = () => {
+    sessionStorage.clear();
+    navigate(routes.LOGIN);
+  }
 
   return (
     <aside className="hidden lg:block">
@@ -105,7 +112,7 @@ function Sidebar() {
           </div>
 
           {/* Logout Button */}
-          <button className="py-2 px-4 border border-emerald-500 bg-emerald-700 w-full rounded text-gray-200 hover:bg-emerald-600 hover:border-emerald-600 justify-end">
+          <button onClick={() => logOut()} className="py-2 px-4 border border-emerald-500 bg-emerald-700 w-full rounded text-gray-200 hover:bg-emerald-600 hover:border-emerald-600 justify-end">
             <FontAwesomeIcon icon={faSignOut}></FontAwesomeIcon> Logout
           </button>
         </div>

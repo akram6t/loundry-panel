@@ -12,6 +12,10 @@ export const tcHeader = [
         label: 'Description'
     },
     {
+        key: 'status',
+        label: 'Status'
+    },
+    {
         key: 'actions',
         label: 'Actions'
     }

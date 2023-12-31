@@ -49,7 +49,7 @@ function Services() {
 
   useEffect(() => {
     getServices();
-  }, [dateFilter]);
+  }, []);
 
   const filteredData = servicesList.filter(item =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -108,6 +108,8 @@ function Services() {
 
             <ServicesTable
               loading={loading}
+              onRefresh={() => getServices()}
+              collection={Collections.PRODUCTS}  
               dataHeader={servicesHeader}
               data={paginatedData}
               currentPage={currentPage}

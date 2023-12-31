@@ -13,7 +13,8 @@ function AddonsTable({
   currentPage,
   itemsPerPage,
   onRefresh,
-  collection
+  collection,
+  edit
 }) {
   const [modalVisible, setModalVisible] = useState({ status: false });
 
@@ -64,12 +65,12 @@ function AddonsTable({
             </TableCell>
             <TableCell dataLabel="ACTIONS" showLabel={true}>
               <span className="space-x-1">
-                <Link
-                  to={`/customers/${row.uid}`}
+                <button
+                  onClick={() => edit(row)}
                   className="bg-black text-gray-100 px-3 py-2 rounded-lg shadow-lg text-sm transition-all hover:bg-opacity-80 active:bg-opacity-50"
                 >
                   Edit
-                </Link>
+                </button>
                 <button
                   onClick={() => deleteData(row._id, row.name)}
                   className="bg-red-600 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-sm transition-all hover:bg-opacity-80 active:bg-opacity-50"

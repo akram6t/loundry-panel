@@ -1,16 +1,34 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Datatables from "../../components/Datatables/Table";
 import TableCell from "../../components/Datatables/TableCell";
 import { status } from "../../data/status";
-import { Colors } from "chart.js";
+import DeleteModal from './../../components/Other/models/ModelDelete';
+import { ImageItentifier } from "../../utils/ImageIdentifier";
 // import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 // import { faPencil, faRemove } from "@fortawesome/free-solid-svg-icons";
 
-const serverUrl = 'https://loundryapp.akram.pw';
+// const serverUrl = 'https://loundryapp.akram.pw';
 
-function OrdersStatusTable({ loading, dataHeader, data, currentPage, itemsPerPage }) {
+function OrdersStatusTable({ edit, onRefresh, collection, loading, dataHeader, data, currentPage, itemsPerPage }) {
+  
+const [modalVisible, setModalVisible] = useState({ status: false });
+
+const deleteData = (id, title) => {
+  if (id) {
+    setModalVisible(
+      {
+        id: id,
+        title: title,
+        status: true,
+        collection: collection
+      }
+    )
+  }
+};
+
   return (
+    <>
     <Datatables loading={loading} dataHeader={dataHeader}>
       {data?.map((row, index) => {
         return <tr
@@ -24,7 +42,7 @@ function OrdersStatusTable({ loading, dataHeader, data, currentPage, itemsPerPag
           </TableCell>
           <TableCell dataLabel="ICON" showLabel={true}>
             <span className="font-medium text-sm text-gray-900">
-              <img src={serverUrl+row.icon} className="w-14 h-14"/>
+              <img src={ImageItentifier(row.icon)} className="w-14 h-14"/>
             </span>
           </TableCell>
           <TableCell dataLabel="TAG" showLabel={true}>
@@ -43,19 +61,30 @@ function OrdersStatusTable({ loading, dataHeader, data, currentPage, itemsPerPag
           </TableCell>
           <TableCell dataLabel="ACTIONS" showLabel={true}>
             <span className="space-x-1">
-              <Link to={`/customers/${row.uid}`} className="bg-black text-gray-100 px-3 py-2 rounded-lg shadow-lg text-sm transition-all hover:bg-opacity-80 active:bg-opacity-50">
+              <button onClick={() => edit(row)} className="bg-black text-gray-100 px-3 py-2 rounded-lg shadow-lg text-sm transition-all hover:bg-opacity-80 active:bg-opacity-50">
                 Edit
-              </Link>
+              </button>
               {
-                row?.type !== 'cancelled' ?               <Link to={`/customers/${row.uid}`} className="bg-red-600 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-sm transition-all hover:bg-opacity-80 active:bg-opacity-50">
+                row?.type !== 'cancelled' ? <button
+                onClick={() => deleteData(row._id, row.tag)}
+                className="bg-red-600 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-sm transition-all hover:bg-opacity-80 active:bg-opacity-50"
+              >
                 Delete
-              </Link>: null
+              </button>: null
               }
             </span>
             </TableCell>
         </tr>
 })}
     </Datatables>
+    
+
+    <DeleteModal
+        onRefresh={() => onRefresh()}
+        isModalVisible={modalVisible}
+        setModalVisibility={(obj) => setModalVisible(obj)}
+      />
+    </>
   );
 }
 

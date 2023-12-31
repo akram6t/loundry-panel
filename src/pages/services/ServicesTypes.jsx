@@ -10,46 +10,75 @@ import EntryOptions from "../../components/Other/EntryOptions";
 import SearchTable from "../../components/Other/SearchTable";
 import { servicesTypesHeader, servicesTypesData } from "../../data/services";
 import ServicesTypeTable from "./ServicesTypesTable";
-import { Collections, DATE_ACC_DESC, URL_GET_LIST } from "../../utils/Constant";
+import { Collections, DATE_ACC_DESC, URL_GET_LIST, sampleIcon } from "../../utils/Constant";
 import axios from "axios";
+import ModalMedia from "../../components/Other/models/ModalMedia";
+import { status } from "../../data/status";
+import ModalCreate from "../../components/Other/models/ModalCreate";
+import { ImageItentifier } from "../../utils/ImageIdentifier";
+import ModalColorPicker from "../../components/Other/models/ModalColorPicker";
 
 function ServicesTypes() {
-  const [servicesTypeList, setServicesTypeList ] = useState([]);
+  const [showMedia, setShowMedia] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [servicesTypeList, setServicesTypeList] = useState([]);
   const [sidebarToggle] = useOutletContext();
   const [loading, setLoading] = useState(false);
   const [dateFilter, setDateFilter] = useState(filterDate[2]);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [CUModal, setCUModal] = useState({ status: false });
+
+  const addData = {
+    image: sampleIcon,
+    name: '',
+    color: '#FEFFEC',
+    status: status[0].label
+  }
+
+  const collection = Collections.SERVICES;
+
+  const handleChangeValue = (name, value) => {
+    let val = value;
+    setCUModal({
+      ...CUModal,
+      data: {
+        ...CUModal.data,
+        [name]: val
+      }
+    })
+  }
 
   const getServicesStypes = async () => {
+    setServicesTypeList([]);
     setLoading(true);
     const params = {
       collection: Collections.SERVICES,
-      sort: JSON.stringify({date: DATE_ACC_DESC.ACCENDING}),
+      sort: JSON.stringify({ date: DATE_ACC_DESC.ACCENDING }),
     }
     try {
       const response = await axios.get(URL_GET_LIST(params));
 
       if (response.status === 200) {
         setLoading(false);
-        const {status, data, message} = response.data;
-        if(status){
+        const { status, data, message } = response.data;
+        if (status) {
           setServicesTypeList([...data]);
         }
       } else {
-        console.error('Error fetching services:', response.statusText);
+        console.error('Error fetching services types:', response.statusText);
       }
     } catch (error) {
       setLoading(false);
-      console.error('Error fetching services:', error);
+      console.error('Error fetching services types:', error);
     }
   };
 
 
   useEffect(() => {
     getServicesStypes();
-  }, [dateFilter]);
+  }, []);
 
   const filteredData = servicesTypeList.filter(item =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -87,9 +116,9 @@ function ServicesTypes() {
           <div className="py-5 flex items-center justify-between">
             <div className="flex flex-col gap-y-2">
               <h2 className="font-bold text-3xl">Services Types</h2>
-              <Linking currentPage="Types" data={LINKINGDATA().SERVICES_TYPE_PAGE}/>
+              <Linking currentPage="Types" data={LINKINGDATA().SERVICES_TYPE_PAGE} />
             </div>
-            <button className="bg-emerald-600 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-md">
+            <button onClick={() => setCUModal({ status: true, collection: collection, data: { ...addData } })} className="bg-emerald-600 transition-all hover:bg-emerald-700 active:bg-emerald-800 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-md">
               + Add New
             </button>
           </div>
@@ -99,15 +128,18 @@ function ServicesTypes() {
 
             {/* FilterBar Start */}
             <div className="flex items-center justify-between pb-3">
-              <EntryOptions onChange={(value) => setItemsPerPage(value)}/>
+              <EntryOptions onChange={(value) => setItemsPerPage(value)} />
               <div className="flex flex-wrap items-center justify-end gap-y-2 md:flex md:items-center md:gap-x-4">
-                <SearchTable searchTerm={searchTerm} handleSearch={(e) => handleSearch(e)}/>
+                <SearchTable searchTerm={searchTerm} handleSearch={(e) => handleSearch(e)} />
                 {/* <FilterDropDown filter={dateFilter} setFilter={(value) => setDateFilter(value)}/> */}
               </div>
             </div>
             {/* Filterbar End */}
 
             <ServicesTypeTable
+              edit={(data) => setCUModal({ status: true, collection: collection, data: { ...data } })}
+              onRefresh={() => getServicesStypes()}
+              collection={Collections.SERVICES}
               loading={loading}
               dataHeader={servicesTypesHeader}
               data={paginatedData}
@@ -118,6 +150,78 @@ function ServicesTypes() {
           </div>
         </div>
       </main>
+      <ModalCreate dismissable={false} title='Service Type' onRefresh={() => getServicesStypes()} isModalVisible={CUModal} setModalVisibility={(obj) => setCUModal(obj)}>
+        {/* input start */}
+        <div className="relative my-2">
+          <label className="font-bold text-sm text-gray-600">
+            Icon
+            <span className="text-red-600 font-bold ml-2">*</span>
+          </label>
+          <div className="flex flex-row space-x-2 items-center">
+            <img alt="icon" className="w-20 h-20 border rounded" src={ImageItentifier(CUModal?.data?.image || addData.image)}></img>
+            <button type="button" onClick={() => setShowMedia(true)} className="bg-gray-600 transition-all hover:bg-gray-700 active:bg-gray-800 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-md">
+              Change
+            </button>
+          </div>
+        </div>
+        {/* input end */}
+        {/* input start */}
+        <div className="relative">
+          <label className="font-bold text-sm text-gray-600">
+            Service Name
+            <span className="text-red-600 font-bold ml-2">*</span>
+          </label>
+          <input
+            value={CUModal?.data?.name}
+            onChange={(e) => handleChangeValue('name', e.target.value)}
+            id="inputWithIcon"
+            type="text"
+            name="inputWithIcon"
+            className="text-md placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1"
+            placeholder="Enter service name"
+          />
+        </div>
+        {/* input end */}
+        {/* input start */}
+        <div className="relative my-2">
+          <label className="font-bold text-sm text-gray-600">
+            Color
+            <span className="text-red-600 font-bold ml-2">*</span>
+          </label>
+          <div className="flex flex-row space-x-2 items-center">
+            <div style={{ backgroundColor: CUModal?.data?.color || addData.color }} className={`border rounded shadow-lg p-2`}>{CUModal?.data?.color}</div>
+            <button type="button" onClick={() => setShowColorPicker(true)} className="bg-gray-600 transition-all hover:bg-gray-700 active:bg-gray-800 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-md">
+              Change
+            </button>
+          </div>
+        </div>
+        {/* input end */}
+        {/* input start */}
+        {
+          CUModal?.data?._id &&
+          <div className="relative">
+            <label className="font-bold text-sm text-gray-600">
+              Status
+              <span className="text-red-600 font-bold ml-2">*</span>
+            </label>
+            <select
+              value={CUModal?.data?.status}
+              onChange={(e) => handleChangeValue('status', e.target.value)}
+              className="text-md placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1">
+              {
+                status.map(item => (
+                  <option value={item.label}>{item.label}</option>
+                ))
+              }
+            </select>
+
+          </div>
+
+        }
+        {/* input end */}
+      </ModalCreate>
+      <ModalColorPicker show={showColorPicker} setShow={setShowColorPicker} color={CUModal?.data?.color} onChangeColor={(color) => handleChangeValue('color', color)}/>
+      <ModalMedia onChangeMedia={(item) => { setCUModal({ ...CUModal, data: { ...CUModal.data, image: item.media } }); setShowMedia(false) }} showMedia={showMedia} setShowMedia={setShowMedia} />
     </>
   );
 }

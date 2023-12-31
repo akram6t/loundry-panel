@@ -7,6 +7,7 @@ import SidebarLogo from "./SidebarLogo.jsx";
 import SidebarSearch from "./SidebarSearch.jsx";
 import MenuList from "./MenuList.jsx";
 import { useNavigate } from "react-router-dom";
+import { routes } from "../../utils/Constant.js";
 
 function Sidebar({ ...props }) {
   const navigate = useNavigate();
@@ -35,7 +36,8 @@ function Sidebar({ ...props }) {
   };
 
   const logout = () => {
-    navigate("/auth/login");
+    sessionStorage.clear();
+    navigate(routes.LOGIN);
   };
 
   return (

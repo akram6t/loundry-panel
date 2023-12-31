@@ -35,7 +35,7 @@ useEffect(() => {
 
   return (
     <div className={`widgetCard p-3 md:py-4 md:px-6 ${props.className}`}>
-      <h1 className="text-medium font-semibold pb-4">Income Statement</h1>
+      <h1 className="text-medium font-semibold pb-4">Order Status</h1>
       <div className="">
         <Pie data={data} options={options} />
       </div>

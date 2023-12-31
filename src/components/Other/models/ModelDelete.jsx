@@ -49,7 +49,7 @@ const DeleteModal = ({isModalVisible, setModalVisibility, onRefresh}) => {
             setLoading(false);
             const {status} = response.data;
             if(status){
-                toast.success(`${collection} added`)
+                toast.success(`${collection} deleted`)
                 setModalVisibility({status: false})
                 onRefresh();
             }

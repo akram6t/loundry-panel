@@ -8,6 +8,8 @@ import Footer from "../../components/Footer.jsx";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import { Collections, URL_GET_LIST, URL_GET_ORDERS__STATUS_COUNT } from "../../utils/Constant.js";
+import ColorPicker from "../../components/Other/ColorPicker.jsx";
+import { useColor } from "react-color-palette";
 
 function Dashboard() {
   const dispatch = useDispatch();
@@ -96,6 +98,7 @@ function Dashboard() {
 
   return (
     <>
+    {/* <ColorPicker color={bg} onChange={(color) => setBg(color)}/> */}
       <main className="h-full">
         {/* Welcome Header */}
         <DashboardHeader

@@ -12,6 +12,9 @@ import Date from "./Date";
 import { Collections, DATE_ACC_DESC, URL_GET_LIST } from "../../utils/Constant";
 import axios from "axios";
 import { useSelector } from 'react-redux';
+import ModalCreate from "../../components/Other/models/ModalCreate";
+import { status } from "../../data/status";
+import AppIndicator from "../../components/Other/AppIndicator";
 
 function OrderDateTime() {
   const [ordersTimingList, setOrdersTimingList] = useState([]);
@@ -20,6 +23,58 @@ function OrderDateTime() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [CUModal, setCUModal] = useState({ status: false });
+  const [store, setStore] = useState(null);
+
+  const addData = {
+    time: '',
+    status: status[0].label
+  }
+
+  const collection = Collections.ORDERS_TIMING;
+
+  const handleChangeValue = (name, value) => {
+    let val = value;
+    setCUModal({
+      ...CUModal,
+      data: {
+        ...CUModal.data,
+        [name]: val
+      }
+    })
+  }
+
+  const getStore = async () => {
+    setLoading(true);
+    const params = {
+      collection: Collections.STORE,
+      select: JSON.stringify({_id: 1, pickup_start_day: 1, delivery_start_day: 1}),
+      limit: 1
+    }
+    try {
+      const response = await axios.get(URL_GET_LIST(params));
+
+      if (response.status === 200) {
+        setLoading(false);
+        const {status, data, message} = response.data;
+        if(status){
+          setStore(data[0]);
+          // console.log(data);
+          console.log(data);
+        }
+      } else {
+        console.error('Error fetching general details:', response.statusText);
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error('Error fetching general details:', error);
+    }
+  };
+
+
+  useEffect(() => {
+    getStore();
+  }, []);
 
   const getOrderTiming = async () => {
     setLoading(true);
@@ -73,6 +128,10 @@ function OrderDateTime() {
     setCurrentPage(page);
   };
 
+  if(store == null){
+    return <AppIndicator/>
+  }
+
   return (
     <>
       <main className="h-full">
@@ -90,12 +149,12 @@ function OrderDateTime() {
           </div>
           {/* Topbar End */}
 
-          <Date />
+          <Date store={store} />
 
           <div className="h-5"></div>
 
           <div className="flex justify-end mb-3 pr-5">
-            <button className="bg-emerald-600 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-md">
+          <button onClick={() => setCUModal({ status: true, collection: collection, data: { ...addData } })} className="bg-emerald-600 transition-all hover:bg-emerald-700 active:bg-emerald-800 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-md">
               + Add New
             </button>
           </div>
@@ -111,7 +170,10 @@ function OrderDateTime() {
             {/* Filterbar End */}
 
             <TimingTable
+              edit={(data) => setCUModal({ status: true, collection: collection, data: { ...data } })}
               loading={loading}
+              onRefresh={() => getOrderTiming()}
+              collection={Collections.ORDERS_TIMING}  
               dataHeader={orderTimingHeader}
               data={paginatedData}
               currentPage={currentPage}
@@ -121,6 +183,50 @@ function OrderDateTime() {
           </div>
         </div>
       </main>
+
+      <ModalCreate title='Order Timing' onRefresh={() => getOrderTiming()} isModalVisible={CUModal} setModalVisibility={(obj) => setCUModal(obj)}>
+        {/* input start */}
+        <div className="relative">
+          <label className="font-bold text-sm text-gray-600">
+            Time
+            <span className="text-red-600 font-bold ml-2">*</span>
+          </label>
+          <input
+            value={CUModal?.data?.time}
+            onChange={(e) => handleChangeValue('time', e.target.value)}
+            id="inputWithIcon"
+            type="text"
+            name="inputWithIcon"
+            className="text-md placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1"
+            placeholder="Enter Time"
+          />
+        </div>
+        {/* input end */}
+
+        {/* input start */}
+        {
+          CUModal?.data?._id &&
+          <div className="relative">
+            <label className="font-bold text-sm text-gray-600">
+              Status
+              <span className="text-red-600 font-bold ml-2">*</span>
+            </label>
+            <select
+              value={CUModal?.data?.status}
+              onChange={(e) => handleChangeValue('status', e.target.value)}
+              className="text-md placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1">
+              {
+                status.map(item => (
+                  <option value={item.label}>{item.label}</option>
+                ))
+              }
+            </select>
+
+          </div>
+
+        }
+        {/* input end */}
+      </ModalCreate>
     </>
   );
 }

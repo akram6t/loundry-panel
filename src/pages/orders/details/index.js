@@ -7,38 +7,84 @@ import AddressDetails from "./AddressDetails";
 import ServicesTables from "./ServicesTables";
 
 import { useSelector } from 'react-redux';
-import { Collections, URL_GET_LIST } from "../../../utils/Constant";
+import { Collections, URL_GET_LIST, URL_POST_DOCUMENT } from "../../../utils/Constant";
 import axios from "axios";
 import { formatDate } from "../../../utils/FormatDate";
 import formatTime from "../../../utils/FormatTime";
 import AppIndicator from "../../../components/Other/AppIndicator";
+import ModalCreate from './../../../components/Other/models/ModalCreate';
+import { paymentMethods } from "../../../data/payment_method";
+import { toast } from "react-toastify";
+import ProgressBar from "../../../components/Other/ProgressBar";
 
 function OrderDetails() {
+  const [isModalVisibility, setModalVisible] = useState({ status: false });
   const [sidebarToggle] = useOutletContext();
-  const [ loading, setLoading ] = useState(false);
+  const [paymentsList, setpaymentsList] = useState([]);
+  const [loading, setLoading] = useState(false);
   const { order_id } = useParams();
-  const [ details, setDetails ] = useState(null);
+  const [details, setDetails] = useState(null);
 
   const [status, setOrderStatus] = useState('');
 
   const order_status = useSelector((state) => state.orderstatus.value);
 
+  const paymentData = {
+    order_id: order_id,
+    paymentMethod: 'Cash',
+    amount: 0,
+  }
   
+  const paymentCollection = Collections.PAYMENTS;
+  const addonsAmount = details?.addons?.reduce((total, addon) => total + addon.price, 0) || 0;
+  const paidAmount = paymentsList?.reduce((total, p) => total + p.amount, 0) || 0;
+
+
   const getOrder = async () => {
     setLoading(true);
     const params = {
       collection: Collections.ORDERS,
-      filter: JSON.stringify({order_id: order_id}),
+      filter: JSON.stringify({ order_id: order_id }),
     }
     try {
       const response = await axios.get(URL_GET_LIST(params));
 
       if (response.status === 200) {
         setLoading(false);
-        const {status, data, message} = response.data;
-        if(status){
+        const { status, data, message } = response.data;
+        if (status) {
           setOrderStatus(data[0].order_status);
           setDetails(data[0]);
+          // console.log(data);
+        }
+      } else {
+        console.error('Error fetching order details:', response.statusText);
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error('Error fetching order details:', error);
+    }
+  };
+  
+
+  useEffect(() => {
+    getOrder();
+  }, []);
+
+  const getpayments = async () => {
+    setLoading(true);
+    const params = {
+      collection: Collections.PAYMENTS,
+      filter: JSON.stringify({ order_id: order_id }),
+    }
+    try {
+      const response = await axios.get(URL_GET_LIST(params));
+
+      if (response.status === 200) {
+        setLoading(false);
+        const { status, data, message } = response.data;
+        if (status) {
+          setpaymentsList([...data]);
           // console.log(data);
         }
       } else {
@@ -52,17 +98,54 @@ function OrderDetails() {
 
 
   useEffect(() => {
-    getOrder();
+    getpayments();
   }, []);
 
 
-  const handleChangeStatus = (value) => {
-    // setDateFilter({ ...dateFilter, order_status: value });
+  const handleChangeStatus = async (value) => {
+    setLoading(true);
+    setOrderStatus(value);
+    try {
+      const response = await axios.post(URL_POST_DOCUMENT, {
+        collection: Collections.ORDERS,
+        data: {
+          _id: details?._id,
+          order_status: value
+        }
+      });
+
+      if (response.status === 200) {
+        console.log(response.data);
+        setLoading(false);
+        const { status } = response.data;
+        if (status) {
+          toast.success(`Order Status Changed`)
+        }
+      } else {
+        toast.error(response.statusText);
+        console.error(`Error crud: ORDERS`, response.statusText);
+      }
+    } catch (error) {
+      setLoading(false);
+      toast.error(error.toString());
+      console.error(`Error crud: ORDERS`, error);
+    }
   }
 
-  if(details == null){
-    return(
-      <AppIndicator/>
+
+  const handleChangePaymentValue = (name, value) => {
+    setModalVisible({
+      ...isModalVisibility,
+      data: {
+        ...isModalVisibility.data,
+        [name]: value
+      }
+    })
+  }
+
+  if (details == null) {
+    return (
+      <AppIndicator />
     );
   }
 
@@ -89,8 +172,8 @@ function OrderDetails() {
                   <h3>{details?.order_date && formatDate(details?.order_date)}</h3>
                   <h3>{details?.order_date && formatTime(details?.order_date)}</h3>
                 </div>
-                <h3 className="hidden sm:block sm:text-xl font-semibold text-emerald-700">{order_id}</h3>
-                <select value={details?.order_status && status} onChange={(e) => setOrderStatus(e.target.value)} style={{ backgroundColor: order_status.find(item => item.tag == status).color }} className={`text-sm sm:text-lg text-white placeholder-gray-500 px-4 rounded-lg border border-gray-200 md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1`}>
+                <h3 className="hidden sm:block sm:text-xl font-semibold text-emerald-700"># {order_id}</h3>
+                <select value={status} onChange={(e) => handleChangeStatus(e.target.value)} style={{ backgroundColor: order_status.find(item => item.tag == status).color }} className={`text-sm sm:text-lg text-white placeholder-gray-500 px-4 rounded-lg border border-gray-200 md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1`}>
                   {
                     order_status.map((item, index) => {
                       return (
@@ -122,8 +205,8 @@ function OrderDetails() {
               <div className="border border-emerald-100 mt-3"></div>
 
               <div className="mt-2 sm:flex space-y-3 sm:space-y-0 items-center justify-between">
-                <AddressDetails  name={'Pickup'} address={details.pickup_address} />
-                <AddressDetails  name={'Delivery'} address={details.delivery_address} />
+                <AddressDetails name={'Pickup'} address={details.pickup_address} />
+                <AddressDetails name={'Delivery'} address={details.delivery_address} />
               </div>
 
 
@@ -137,35 +220,38 @@ function OrderDetails() {
             {/* right container */}
             <div className="w-full md:w-60 border bg-white border-gray-200 py-4 px-6 rounded-md">
 
-            <div>
+              <div>
                 <h1 className="font-semibold text-lg mb-2">Payment Details</h1>
-                  <h2 className="flex items-center justify-between">Sub Total: <span className="font-semibold">₹ {details.amount}</span></h2>
-                  <h2 className="flex items-center justify-between">Service Fee: <span className="font-semibold">₹ {details.service_fee}</span></h2>
-                  {
-                    details?.addons?.map((item, index) => (
-                      <h2 key={index} className="flex items-center justify-between">{item.name}: <span className="font-semibold">₹ {item.price}</span></h2>
-                    ))
-                  }
-                  <h2 className="flex items-center justify-between">Grand Total: <span className="font-semibold">₹ {details.amount + details.service_fee + (details?.addons?.reduce((total, addon) => total + addon.price, 0) || 0)}</span></h2>
-                </div>
+                <h2 className="flex items-center justify-between">Sub Total: <span className="font-semibold">₹ {details.amount}</span></h2>
+                <h2 className="flex items-center justify-between">Service Fee: <span className="font-semibold">₹ {details.service_fee}</span></h2>
+                {
+                  details?.addons?.map((item, index) => (
+                    <h2 key={index} className="flex items-center justify-between">{item.name}: <span className="font-semibold">₹ {item.price}</span></h2>
+                  ))
+                }
+                <h2 className="flex items-center justify-between">Grand Total: <span className="font-semibold">₹ {details.amount + details.service_fee + addonsAmount}</span></h2>
+              </div>
 
-                
+
               {/* divider */}
               <div className="border border-emerald-100 mt-3 mb-3"></div>
 
               <h1 className="text-lg font-semibold mt-2">Payments</h1>
 
-              <div className="mt-4 flex-1"> {/* list */}
-                {/* item */}
-                {/* <div className="bg-gray-100 border p-2 rounded-md"> */}
-                  {/* <h2 className="font-semibold">₹ {32}</h2> */}
-                  {/* <h5>04 feb 2023 [Cash]</h5> */}
-                {/* </div> */}
-                {/* item */}
+              <div className="mt-4 flex-1">
+                {/* list */}
+                {paymentsList.map((item, index) => {
+                  return (
+                    <div className="bg-gray-100 border p-2 rounded-md mt-1">
+                      <h2 className="font-semibold">₹ {item.amount}</h2>
+                      <h5>{formatDate(item.date)} [{item.paymentMethod}]</h5>
+                    </div>
+                  )
+                })}
               </div>
 
               <div className="space-y-1 mt-3">
-                <button className="hover:bg-opacity-80 active:bg-opacity-50 transition-all w-full bg-emerald-600 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-sm">
+                <button onClick={() => setModalVisible({ status: true, collection: paymentCollection, data: { ...paymentData, amount: ((details?.amount + details?.service_fee + addonsAmount) - (paidAmount || 0)) < 0 ? 0 :(details?.amount + details?.service_fee + addonsAmount) - (paidAmount || 0) } })} className="hover:bg-opacity-80 active:bg-opacity-50 transition-all w-full bg-emerald-600 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-sm">
                   Add Payment
                 </button>
                 <button className="hover:bg-opacity-80 active:bg-opacity-50 transition-all w-full bg-black text-gray-100 px-3 py-2 rounded-lg shadow-lg text-sm">
@@ -181,9 +267,75 @@ function OrderDetails() {
 
           </div>
 
-
         </div>
       </main>
+
+      <ModalCreate title={'Payment'} isModalVisible={isModalVisibility} onRefresh={() => getpayments()} setModalVisibility={(obj) => setModalVisible(obj)}>
+        <div className="flex items-center justify-between">
+          <span>Customer Name:</span>
+          <span className="font-semibold">{details?.pickup_address?.name}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span>Order ID:</span>
+          <span className="font-semibold"># {details?.order_id}</span>
+        </div>
+        {/* divider */}
+        <div className="border border-emerald-100 mt-3 mb-3"></div>
+
+        <div className="flex items-center justify-between">
+          <span>order Amount:</span>
+          <span className="font-semibold">₹ {details?.amount + details?.service_fee + addonsAmount}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span>Paid:</span>
+          <span className="font-semibold">₹ {paidAmount}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span>Balance:</span>
+          <span className="font-semibold">₹ {(details?.amount + details?.service_fee + addonsAmount) - paidAmount}</span>
+        </div>
+        {/* divider */}
+        <div className="border border-emerald-100 mt-3 mb-3"></div>
+        <div className="flex items-center justify-between">
+          {/* input start */}
+          <div className="relative mr-1">
+            <label className="font-bold text-sm text-gray-600">
+              Amount
+              <span className="text-red-600 font-bold ml-2">*</span>
+            </label>
+            <input
+              value={isModalVisibility?.data?.amount}
+              onChange={(e) => handleChangePaymentValue('amount', e.target.value)}
+              id="inputWithIcon"
+              type="number"
+              name="inputWithIcon"
+              className="text-md placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1"
+              placeholder="Enter amount"
+            />
+          </div>
+          {/* input end */}
+
+          {/* input end */}
+          <div className="relative ml-1">
+            <label className="font-bold text-sm text-gray-600">
+              PaymentMethod
+              <span className="text-red-600 font-bold ml-2">*</span>
+            </label>
+            <select
+              value={isModalVisibility?.data?.type}
+              onChange={(e) => handleChangePaymentValue('paymentMethod', e.target.value)}
+              className="text-md placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1">
+              {
+                paymentMethods.map(item => (
+                  <option value={item}>{item}</option>
+                ))
+              }
+            </select>
+          </div>
+          {/* input end */}
+        </div>
+
+      </ModalCreate>
     </>
   );
 }
@@ -191,85 +343,85 @@ function OrderDetails() {
 export default OrderDetails;
 
 
-const detailsData = {
-  "_id": "6572265566b29db63bf03dec",
-  "uid": "cC8B1tZcjzTVyTnp07Aj5fDWl0B2",
-  "addons":[
-    {
-      "name": 'Extra care',
-      "price": 10
-    },
-  ],
-  "items": [
-    {
-      "_id": "654483a03dd85806ea9f6a4b",
-      "image": "https://cdn-icons-png.flaticon.com/128/4643/4643574.png",
-      "name": "shirt",
-      "quantity": 1,
-      "gender": "Man",
-      "services": [
-        {
-          "name": "Iron Only",
-          "price": 10
-        }
-      ],
-      "shopid": "65442ccd8674edea93aa8587"
-    },
-    {
-      "_id": "654483a03dd85806ea9f6a4c",
-      "image": "https://cdn-icons-png.flaticon.com/128/892/892458.png",
-      "name": "T-shirt",
-      "quantity": 1,
-      "gender": "men",
-      "services": [
-        {
-          "name": "Iron Only",
-          "price": 10
-        }
-      ],
-      "shopid": "65442ccd8674edea93aa8587"
-    }
-  ],
-  "pickup_date": {
-    "date": "2023-12-07T20:07:38.023Z",
-    "time": "07 - 08 pm"
-  },
-  "delivery_date": {
-    "date": "2023-12-07T20:07:38.101Z",
-    "time": "07 - 08 pm"
-  },
-  "pickup_address": {
-    "_id": "6572060066b29db63bf03de8",
-    "uid": "cC8B1tZcjzTVyTnp07Aj5fDWl0B2",
-    "name": "Archit Vishvkarma",
-    "mobile": "9131265569",
-    "pincode": "452006",
-    "state": "Madhya Pradesh",
-    "city": "Indore",
-    "house": "512",
-    "area": "01, Chandan Nagar",
-    "type": "home",
-    "nearby": "Asad kirana dukaan ke pass"
-  },
-  "delivery_address": {
-    "_id": "6572060066b29db63bf03de8",
-    "uid": "cC8B1tZcjzTVyTnp07Aj5fDWl0B2",
-    "name": "Archit Vishvkarma",
-    "mobile": "9131265569",
-    "pincode": "452006",
-    "state": "Madhya Pradesh",
-    "city": "Indore",
-    "house": "512",
-    "area": "01, Chandan Nagar",
-    "type": "home",
-    "nearby": "Asad kirana dukaan ke pass"
-  },
-  "payment_type": "Cash on Delivery",
-  "service_fee": 5,
-  "order_status": "Confirmed",
-  "amount": 20,
-  "order_id": "ORD_CC8B3ACRQY",
-  "order_date": "2023-12-07T20:08:53.188Z",
-  "storeid": "65442ccd8674edea93aa8587",
-  "storename": "Golden Award"
-}
+// const detailsData = {
+//   "_id": "6572265566b29db63bf03dec",
+//   "uid": "cC8B1tZcjzTVyTnp07Aj5fDWl0B2",
+//   "addons":[
+//     {
+//       "name": 'Extra care',
+//       "price": 10
+//     },
+//   ],
+//   "items": [
+//     {
+//       "_id": "654483a03dd85806ea9f6a4b",
+//       "image": "https://cdn-icons-png.flaticon.com/128/4643/4643574.png",
+//       "name": "shirt",
+//       "quantity": 1,
+//       "gender": "Man",
+//       "services": [
+//         {
+//           "name": "Iron Only",
+//           "price": 10
+//         }
+//       ],
+//       "shopid": "65442ccd8674edea93aa8587"
+//     },
+//     {
+//       "_id": "654483a03dd85806ea9f6a4c",
+//       "image": "https://cdn-icons-png.flaticon.com/128/892/892458.png",
+//       "name": "T-shirt",
+//       "quantity": 1,
+//       "gender": "men",
+//       "services": [
+//         {
+//           "name": "Iron Only",
+//           "price": 10
+//         }
+//       ],
+//       "shopid": "65442ccd8674edea93aa8587"
+//     }
+//   ],
+//   "pickup_date": {
+//     "date": "2023-12-07T20:07:38.023Z",
+//     "time": "07 - 08 pm"
+//   },
+//   "delivery_date": {
+//     "date": "2023-12-07T20:07:38.101Z",
+//     "time": "07 - 08 pm"
+//   },
+//   "pickup_address": {
+//     "_id": "6572060066b29db63bf03de8",
+//     "uid": "cC8B1tZcjzTVyTnp07Aj5fDWl0B2",
+//     "name": "Archit Vishvkarma",
+//     "mobile": "9131265569",
+//     "pincode": "452006",
+//     "state": "Madhya Pradesh",
+//     "city": "Indore",
+//     "house": "512",
+//     "area": "01, Chandan Nagar",
+//     "type": "home",
+//     "nearby": "Asad kirana dukaan ke pass"
+//   },
+//   "delivery_address": {
+//     "_id": "6572060066b29db63bf03de8",
+//     "uid": "cC8B1tZcjzTVyTnp07Aj5fDWl0B2",
+//     "name": "Archit Vishvkarma",
+//     "mobile": "9131265569",
+//     "pincode": "452006",
+//     "state": "Madhya Pradesh",
+//     "city": "Indore",
+//     "house": "512",
+//     "area": "01, Chandan Nagar",
+//     "type": "home",
+//     "nearby": "Asad kirana dukaan ke pass"
+//   },
+//   "payment_type": "Cash on Delivery",
+//   "service_fee": 5,
+//   "order_status": "Confirmed",
+//   "amount": 20,
+//   "order_id": "ORD_CC8B3ACRQY",
+//   "order_date": "2023-12-07T20:08:53.188Z",
+//   "storeid": "65442ccd8674edea93aa8587",
+//   "storename": "Golden Award"
+// }

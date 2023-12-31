@@ -3,6 +3,7 @@ const  routes = {
     DASHBOARD: '/',
 
     CUSTOMERS: '/customers',
+    CUSTOMERS_CREATE: '/customers/create',
     CUSTOMERS_EDIT: '/customers/:uid',
 
     ORDER_CREATE: '/order/create',
@@ -31,26 +32,34 @@ const  routes = {
     TC: '/tc',
     BANNERS: '/banners',
     ORDERS_STATUS: '/os',
-    DATE_TIMING: '/date_time'
+    DATE_TIMING: '/date_time',
+
+    LOGIN: '/auth/login'
 
 }
 
+// export const BASE_URL = 'http://localhost:5000';
 export const BASE_URL = 'https://fixed-swamp-lingonberry.glitch.me';
 
 const URL_GET_LIST = (params) => {
     const queryParams = new URLSearchParams(params);
-    return `https://fixed-swamp-lingonberry.glitch.me/admin/apis/get_list?${queryParams}`
+    return `${BASE_URL}/admin/apis/get_list?${queryParams}`
 }
 
-export const URL_DELETE_DOCUMENT = 'https://fixed-swamp-lingonberry.glitch.me/admin/apis/delete_document'
+export const URL_DELETE_DOCUMENT = `${BASE_URL}/admin/apis/delete_document`;
 
-export const URL_GET_ORDERS__STATUS_COUNT = 'https://fixed-swamp-lingonberry.glitch.me/admin/apis/orders_status_count'
-export const URL_POST_MEDIA = 'https://fixed-swamp-lingonberry.glitch.me/admin/apis/add_media'
+export const URL_POST_DOCUMENT = `${BASE_URL}/admin/apis/post_data`;
+// export const URL_UPDATE_DOCUMENT = `${BASE_URL}/admin/apis/post_data`;
+
+export const URL_GET_ORDERS__STATUS_COUNT = `${BASE_URL}/admin/apis/orders_status_count`;
+export const URL_POST_MEDIA = `${BASE_URL}/admin/apis/add_media`;
 
 export const DATE_ACC_DESC = {
     ACCENDING: 1,
     DECENDING: -1
 }
+
+export const sampleIcon = 'https://logo.com/image-cdn/images/kts928pd/production/4b1820dbc4ce86b445e7206c00756e955ec9c080-347x342.png?w=640&q=72';
 
 
 export const Collections = {
@@ -68,7 +77,8 @@ export const Collections = {
     PRODUCTS: 'products',
     SERVICES: 'services',
     STORE: 'shop',
-    MEDIA: 'media'
+    MEDIA: 'media',
+    PAYMENTS: 'payments'
 }
 
 export {routes, URL_GET_LIST};

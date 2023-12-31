@@ -38,7 +38,7 @@ function CustomerTable({ loading, dataHeader, data, currentPage, itemsPerPage })
           </TableCell>
           <TableCell dataLabel="CREATED_AT" showLabel={true}>
             <span className="font-medium text-sm text-gray-900">
-            {formatDate(row.createdAt)}
+            {formatDate(row.date)}
             </span>
           </TableCell>
           <TableCell dataLabel="ACTIONS" showLabel={true}>

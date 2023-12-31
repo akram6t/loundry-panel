@@ -10,6 +10,8 @@ import { tcData, tcHeader } from "../../data/tc";
 import TCTable from "./TCTable";
 import { Collections, DATE_ACC_DESC, URL_GET_LIST } from "../../utils/Constant";
 import axios from 'axios';
+import { status } from "../../data/status";
+import ModalCreate from "../../components/Other/models/ModalCreate";
 
 function TC() {
   const [tcList, setTcList ] = useState([]);
@@ -18,8 +20,30 @@ function TC() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [CUModal, setCUModal] = useState({ status: false });
+
+  
+  const addData = {
+    title: '',
+    description: '',
+    status: status[0].label
+  }
+
+  const collection = Collections.TC;
+
+  const handleChangeValue = (name, value) => {
+    let val = value;
+    setCUModal({
+      ...CUModal,
+      data: {
+        ...CUModal.data,
+        [name]: val
+      }
+    })
+  }
 
   const gettNc = async () => {
+    setTcList([]);
     setLoading(true);
     const params = {
       collection: Collections.TC,
@@ -84,7 +108,7 @@ function TC() {
               <h2 className="font-bold text-3xl">Terms & Conditions</h2>
               <Linking currentPage="Terms & Conditions" data={LINKINGDATA().ADDONS}/>
             </div>
-            <button className="bg-emerald-600 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-md">
+            <button onClick={() => setCUModal({ status: true, collection: collection, data: { ...addData } })} className="bg-emerald-600 transition-all hover:bg-emerald-700 active:bg-emerald-800 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-md">
               + Add New
             </button>
           </div>
@@ -103,6 +127,9 @@ function TC() {
             {/* Filterbar End */}
 
             <TCTable
+              edit={(data) => setCUModal({ status: true, collection: collection, data: { ...data } })}
+              onRefresh={() => gettNc()}
+              collection={Collections.TC}  
               loading={loading}
               dataHeader={tcHeader}
               data={paginatedData}
@@ -113,6 +140,69 @@ function TC() {
           </div>
         </div>
       </main>
+
+      <ModalCreate title='T&C' onRefresh={() => gettNc()} isModalVisible={CUModal} setModalVisibility={(obj) => setCUModal(obj)}>
+        {/* input start */}
+        <div className="relative">
+          <label className="font-bold text-sm text-gray-600">
+            Title
+            <span className="text-red-600 font-bold ml-2">*</span>
+          </label>
+          <input
+            value={CUModal?.data?.title}
+            onChange={(e) => handleChangeValue('title', e.target.value)}
+            id="inputWithIcon"
+            type="text"
+            name="inputWithIcon"
+            className="text-md placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1"
+            placeholder="Enter title"
+          />
+        </div>
+        {/* input end */}
+        {/* })} */}
+        {/* input start */}
+        <div className="relative">
+          <label className="font-bold text-sm text-gray-600">
+            Description
+            <span className="text-red-600 font-bold ml-2">*</span>
+          </label>
+          <textarea
+            // value={CUModal?.data?.description}
+            rows={5}
+            onChange={(e) => handleChangeValue('description', e.target.value)}
+            id="inputWithIcon"
+            type="text"
+            name="inputWithIcon"
+            className="text-md placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1"
+            placeholder="Enter description"
+          >{CUModal?.data?.description}</textarea>
+        </div>
+        {/* input end */}
+
+        {/* input start */}
+        {
+          CUModal?.data?._id &&
+          <div className="relative">
+            <label className="font-bold text-sm text-gray-600">
+              Status
+              <span className="text-red-600 font-bold ml-2">*</span>
+            </label>
+            <select
+              value={CUModal?.data?.status}
+              onChange={(e) => handleChangeValue('status', e.target.value)}
+              className="text-md placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1">
+              {
+                status.map(item => (
+                  <option value={item.label}>{item.label}</option>
+                ))
+              }
+            </select>
+
+          </div>
+
+        }
+        {/* input end */}
+      </ModalCreate>
     </>
   );
 }
