@@ -1,6 +1,8 @@
 import { faBars, faBell, faMessage } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
+import { Link, Routes } from "react-router-dom";
+import { routes } from './../../utils/Constant';
 
 function Index({ toggle }) {
   const avatar =
@@ -18,17 +20,17 @@ function Index({ toggle }) {
             </div>
             <div className="">
               <ul className="flex flex-row space-x-4 items-center">
-                <li>
+                <Link to={routes.MESSAGES}>
                   <span className="h-9 w-9 cursor-pointer text-gray-600">
                     <FontAwesomeIcon icon={faMessage} />
                   </span>
-                </li>
-                <li>
+                </Link>
+                <Link to={routes.NOTIFICATIONS}>
                   <span className="h-9 w-9 cursor-pointer text-gray-600">
                     <FontAwesomeIcon icon={faBell} />
                   </span>
-                </li>
-                <li>
+                </Link>
+                <Link to={routes.GENERAL_SETTINGS}>
                   <span>
                     <img
                       className="rounded-full h-9 w-9 border cursor-pointer"
@@ -36,7 +38,7 @@ function Index({ toggle }) {
                       alt="Avatar"
                     />
                   </span>
-                </li>
+                </Link>
               </ul>
             </div>
           </div>

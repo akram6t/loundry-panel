@@ -34,7 +34,9 @@ const  routes = {
     ORDERS_STATUS: '/os',
     DATE_TIMING: '/date_time',
 
-    LOGIN: '/auth/login'
+    LOGIN: '/auth/login',
+    NOTIFICATIONS: '/notifications',
+    MESSAGES: '/messages'
 
 }
 
@@ -78,7 +80,8 @@ export const Collections = {
     SERVICES: 'services',
     STORE: 'shop',
     MEDIA: 'media',
-    PAYMENTS: 'payments'
+    PAYMENTS: 'payments',
+    ADMIN: 'admin'
 }
 
 export {routes, URL_GET_LIST};

@@ -32,6 +32,8 @@ import ServicesCreate from "./pages/services_create";
 import Banners from "./pages/banners";
 import { useNavigate } from "react-router-dom";
 import AppIndicator from "./components/Other/AppIndicator";
+import Notifications from "./pages/notification";
+import Messages from "./pages/messages";
 
 function App() {
   // const navigate = useNavigate();
@@ -86,13 +88,15 @@ function App() {
         <Route path={routes.ORDERS_STATUS} element={<OrdersStatus />}></Route>
         <Route path={routes.DATE_TIMING} element={<OrderDateTime />}></Route>
         
+        <Route path={routes.NOTIFICATIONS} element={<Notifications />}></Route>
+        <Route path={routes.MESSAGES} element={<Messages />}></Route>
+        
         <Route path="/404" element={<NotFound />}></Route>
         <Route path="/form" element={<Form />}></Route>
         <Route path="/profile" element={<Blank />}></Route>
       </Route>
       <Route path="/auth" element={<GuestLayout />}>
         <Route path="/auth/login" element={<Login setToken={(token) => setToken(token)} />}></Route>
-        {/* <Route path="/auth/register" element={<RegisterIndex />}></Route> */}
       </Route>
     </Routes>
   );

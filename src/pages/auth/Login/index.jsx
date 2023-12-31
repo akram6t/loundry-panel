@@ -1,24 +1,57 @@
 import { faEnvelope, faLock } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ProgressBar from "../../../components/Other/ProgressBar";
 import { toast } from "react-toastify";
-import { routes } from "../../../utils/Constant";
+import { Collections, URL_GET_LIST, routes } from "../../../utils/Constant";
+import AppIndicator from "../../../components/Other/AppIndicator";
+import axios from "axios";
 
 function LoginIndex({setToken}) {
-  const e = 'admin@gmail.com';
-  const p = '123456';
+  const [admin, setAdmin] = useState(null);
   const navigate = useNavigate();
   const [error, setError] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const getAdmin = async () => {
+    setLoading(true);
+    const params = {
+      collection: Collections.ADMIN,
+      limit: 1
+    }
+    try {
+      const response = await axios.get(URL_GET_LIST(params));
+
+      if (response.status === 200) {
+        setLoading(false);
+        const { status, data, message } = response.data;
+        if (status) {
+          setAdmin(data[0]);
+          // console.log(data);
+        }
+      } else {
+        console.error('Error fetching admin details:', response.statusText);
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error('Error fetching admin details:', error);
+    }
+  };
+
+
+  useEffect(() => {
+    getAdmin();
+  }, []);
+
+
   const handleSubmit = (event) => {
     event.preventDefault();
     setLoading(true);
     setError(false);
-    if(email === e && password === p){
+    if((email === admin.username || email === admin.email ) && (password === admin.password)){
       setToken(true);
       setError(false);
       setLoading(false);
@@ -30,6 +63,11 @@ function LoginIndex({setToken}) {
       toast.error('Email or Password is Wrong.');
     }
   };
+
+  if(admin == null){
+    return <AppIndicator/>
+  }
+
   const LoginImage =
     "https://edp.raincode.my.id/static/media/login.cc0578413db10119a7ff.png";
   return (

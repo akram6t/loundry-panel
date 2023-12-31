@@ -8,6 +8,10 @@ export const orderReportHeader = [
         label: 'Date'
     },
     {
+        key: 'order_id',
+        label: 'Order Id'
+    },
+    {
         key: 'customer',
         label: 'Customer'
     },
@@ -23,64 +27,45 @@ export const orderReportHeader = [
 
 export const orderReportData = [
     {
-        name: 'Catherine Wheeler',
+        pickup_address: {name: 'Catherine Wheeler'},
         date: '08 Feb, 2023',
         order_id: '0019',
         amount: 32,
-        status: {
-            status: 'Delivered',
-            color: '#008000'
-        },
+        order_status: 'Pickup',
     },
     {
-        name: 'Catherine Wheeler',
+        pickup_address: {name: 'Catherine Wheeler'},
         date: '08 Feb, 2023',
         order_id: '0019',
         amount: 32,
-        status: 'Pickup',
-        status: {
-            status: 'Pickup',
-            color: '#FFA500'
-        },
+        order_status: 'Pickup',
     },
     {
-        name: 'Catherine Wheeler',
+        pickup_address: {name: 'Catherine Wheeler'},
         date: '08 Feb, 2023',
         order_id: '0019',
         amount: 32,
-        status: {
-            status: "InProgress",
-            color: "#C3A600",
-        }
+        order_status: 'Pickup',
     },
     {
-        name: 'Catherine Wheeler',
+        pickup_address: {name: 'Catherine Wheeler'},
         date: '08 Feb, 2023',
         order_id: '0019',
         amount: 32,
-        status: {
-            status: "Shipped",
-            color: "#1E0080",
-        }
+        order_status: 'Pickup',
     },
     {
-        name: 'Catherine Wheeler',
+        pickup_address: {name: 'Catherine Wheeler'},
         date: '08 Feb, 2023',
         order_id: '0019',
         amount: 32,
-        status: {
-            status: "Delivered",
-            color: "#008000",
-        }
+        order_status: 'Delivered',
     },
     {
-        name: 'Catherine Wheeler',
+        pickup_address: {name: 'Catherine Wheeler'},
         date: '08 Feb, 2023',
         order_id: '0019',
         amount: 32,
-        status: {
-            status: "Cancelled",
-            color: "#800000",
-        }
+        order_status: 'Confirmed',
     },
 ]

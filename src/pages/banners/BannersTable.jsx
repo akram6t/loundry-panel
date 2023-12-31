@@ -37,12 +37,12 @@ function BannerTable({ edit, onRefresh, collection, loading, dataHeader, data, c
               {(currentPage - 1) * itemsPerPage + index + 1}
             </span>
           </TableCell>
-          <TableCell dataLabel="AMOUNT" showLabel={true}>
+          <TableCell dataLabel="IMAGE" showLabel={true}>
             <span className="font-medium text-sm text-gray-900">
             <img src={ImageItentifier(row.image)} className="w-34 h-20 object-contain"/>
             </span>
           </TableCell>
-          <TableCell dataLabel="TAX INCLUDED?" showLabel={true}>
+          <TableCell dataLabel="STATUS" showLabel={true}>
             <span className={`font-medium text-sm text-gray-900 ${status.find(item => item.label === row.status).color} px-2 py-1 rounded-full shadow`}>
             { status.find(item => item.label === row.status).label }
             </span>

@@ -8,25 +8,31 @@ import Linking from "../../components/Other/Linking";
 import LINKINGDATA from "../../data/linking_data";
 import EntryOptions from "../../components/Other/EntryOptions";
 import SearchTable from "../../components/Other/SearchTable";
-import { order_status } from "../../data/order_status";
+// import { order_status } from "../../data/order_status";
 import { DateInInput } from "../../utils/DateInInput";
+import { useSelector } from "react-redux";
+import { Collections, DATE_ACC_DESC, URL_GET_LIST } from "../../utils/Constant";
+import axios from "axios";
 
 function OrdersReport() {
-    const [ordersReportList, setOrdersReportList] = useState(orderReportData);
+  const order_status = useSelector((state) => state.orderstatus.value);
+    const [ordersReportList, setOrdersReportList] = useState([]);
     const [sidebarToggle] = useOutletContext();
     const [loading, setLoading] = useState(false);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [ dateFilter, setDateFilter ] = useState({
-        start: DateInInput(new Date()),
-        end: DateInInput(new Date()),
+        $lte: DateInInput(new Date()),
+        $gte: DateInInput(new Date()),
         order_status: 'all'
     });
 
     const filteredData = ordersReportList.filter(item =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.status.status.toLowerCase().includes(searchTerm.toLowerCase())
+        item.order_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.amount.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.order_status.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.pickup_address.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const totalItems = filteredData.length;
@@ -51,9 +57,39 @@ function OrdersReport() {
         setDateFilter({ ...dateFilter, order_status: value });
     }
 
-    useEffect(() => {
-        // get data
-    }, [dateFilter]);
+    const getOrders = async () => {
+        const query = dateFilter.order_status === 'all' ? {} : { order_status: dateFilter.order_status };
+        setOrdersReportList([]);
+        setLoading(true);
+        const params = {
+          collection: Collections.ORDERS,
+          filter: JSON.stringify({order_date: { $lte:  dateFilter.$lt, $gte: dateFilter.$gte}, ...query}),
+          sort: JSON.stringify({order_date: DATE_ACC_DESC.DECENDING}),
+          select: JSON.stringify({ items: 0, storeid: 0, storename: 0, payment_type: 0, _id: 0 })
+        }
+        try {
+          const response = await axios.get(URL_GET_LIST(params));
+    
+          if (response.status === 200) {
+            setLoading(false);
+            const {status, data, message} = response.data;
+            if(status){
+                setOrdersReportList([...data]);
+            }
+          } else {
+            setLoading(false);
+            console.error('Error fetching orders:', response.statusText);
+          }
+        } catch (error) {
+          setLoading(false);
+          console.error('Error fetching orders:', error);
+        }
+      };
+    
+    
+      useEffect(() => {
+        getOrders();
+      }, [dateFilter]);
 
     return (
         <>
@@ -81,10 +117,10 @@ function OrdersReport() {
                                     Start Date <span className="text-red-600 text-md">*</span>
                                 </label>
                                 <input
-                                value={dateFilter.start}
+                                value={dateFilter.$gte}
                                     id="defaultInput"
                                     type="date"
-                                    onChange={(e) => setDateFilter({...dateFilter, start: e.target.value})}
+                                    onChange={(e) => setDateFilter({...dateFilter, '$gte': e.target.value})}
                                     name="defaultInput"
                                     // onChange={(e) => setEmail(e.target.value)}
                                     className="text-sm placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1"
@@ -97,8 +133,8 @@ function OrdersReport() {
                                 </label>
                                 <input
                                     id="defaultInput"
-                                    value={dateFilter.end}
-                                    onChange={(e) => setDateFilter({...dateFilter, end: e.target.value})}
+                                    value={dateFilter.$lte}
+                                    onChange={(e) => setDateFilter({...dateFilter, '$lte': e.target.value})}
                                     type="date"
                                     name="defaultInput"
                                     // onChange={(e) => setEmail(e.target.value)}
@@ -110,7 +146,7 @@ function OrdersReport() {
                             <label htmlFor="defaultInput" className="font-bold text-sm text-gray-600">
                                     Status <span className="text-red-600 text-md">*</span>
                                 </label>
-                            <select onChange={(e) => handleChangeStatus(e.target.value)} className="text-sm placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1">
+                            <select value={dateFilter.order_status} onChange={(e) => handleChangeStatus(e.target.value)} className="text-sm placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1">
                                 <option className="m-2" value={'all'}>All Orders</option>
                                 {
                                     order_status.map((item, index) => {
@@ -138,6 +174,7 @@ function OrdersReport() {
                         {/* Filterbar End */}
 
                         <ReportTable
+                            orderStatus={order_status}
                             loading={loading}
                             dataHeader={orderReportHeader}
                             data={paginatedData}

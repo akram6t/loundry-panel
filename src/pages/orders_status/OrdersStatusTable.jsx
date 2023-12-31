@@ -48,7 +48,7 @@ const deleteData = (id, title) => {
           <TableCell dataLabel="TAG" showLabel={true}>
             <span className="font-semibold text-sm text-gray-900">{row.tag}</span>
           </TableCell>
-          <TableCell dataLabel="TAG" showLabel={true}>
+          <TableCell dataLabel="POSITION" showLabel={true}>
             <span className="font-semibold text-sm text-gray-900">{row.position}</span>
           </TableCell>
           <TableCell dataLabel="COLOR" showLabel={true}>

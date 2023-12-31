@@ -17,16 +17,19 @@ function ExpenseReportTable({ loading, dataHeader, data, currentPage, itemsPerPa
             </span>
           </TableCell>
           <TableCell dataLabel="NAME" showLabel={true}>
-            <span className="font-medium text-sm text-gray-900">{row.name}</span>
+            <span className="font-medium text-sm text-gray-900">{row?.towards}</span>
           </TableCell>
           <TableCell dataLabel="AMOUNT" showLabel={true}>
-            <span className="font-medium text-sm text-gray-900">₹ {row.amount}</span>
+            <span className="font-medium text-sm text-gray-900">₹ {row?.amount}</span>
           </TableCell>
-          <TableCell dataLabel="TAX(%)" showLabel={true}>
+          <TableCell dataLabel="Tax(%)" showLabel={true}>
+            <span className="font-medium text-sm text-gray-900">₹ { row?.taxIncluded === taxIncluded[0].label ? row?.taxPercentage : 0}</span>
+          </TableCell>
+          {/* <TableCell dataLabel="TAX(%)" showLabel={true}>
           <span className={`font-medium text-sm text-gray-900 ${taxIncluded.find(item => item.label === row.taxIncluded).color} px-2 py-1 rounded-full shadow`}>
             { taxIncluded.find(item => item.label === row.taxIncluded).label }
             </span>
-          </TableCell>
+          </TableCell> */}
           <TableCell dataLabel="PAYMENT METHOD" showLabel={true}>
             <span className="font-medium text-sm text-gray-900">{row.paymentMethod}</span>
           </TableCell>

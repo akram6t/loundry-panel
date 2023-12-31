@@ -9,22 +9,28 @@ import EntryOptions from "../../components/Other/EntryOptions";
 import SearchTable from "../../components/Other/SearchTable";
 import { DateInInput } from "../../utils/DateInInput";
 import ExpenseReportTable from "./ExpenseReportTable";
+import { Collections, DATE_ACC_DESC, URL_GET_LIST } from "../../utils/Constant";
+import axios from "axios";
 
 function ExpenseReport() {
-    const [expenseReportList, setExpenseReportList] = useState(expenseReportData);
+    const [expenseReportList, setExpenseReportList] = useState([]);
     const [sidebarToggle] = useOutletContext();
     const [loading, setLoading] = useState(false);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [ dateFilter, setDateFilter ] = useState({
-        start: DateInInput(new Date()),
-        end: DateInInput(new Date()),
+        $lte: DateInInput(new Date()),
+        $gte: DateInInput(new Date()),
     });
 
     const filteredData = expenseReportList.filter(item =>
         item.date.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.customer.toLowerCase().includes(searchTerm.toLowerCase())
+        item.amount.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.taxIncluded.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.paymentMethod.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.taxPercentage.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.towards.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const totalItems = filteredData.length;
@@ -45,10 +51,37 @@ function ExpenseReport() {
         setCurrentPage(page);
     };
 
-    useEffect(() => {
-        // get data
-    }, [dateFilter]);
-
+    const getOrders = async () => {
+        setExpenseReportList([]);
+        setLoading(true);
+        const params = {
+          collection: Collections.EXPENSES,
+          filter: JSON.stringify({date: { $lte:  dateFilter.$lt, $gte: dateFilter.$gte}}),
+          sort: JSON.stringify({date: DATE_ACC_DESC.ACCENDING}),
+        }
+        try {
+          const response = await axios.get(URL_GET_LIST(params));
+    
+          if (response.status === 200) {
+            setLoading(false);
+            const {status, data, message} = response.data;
+            if(status){
+                setExpenseReportList([...data]);
+            }
+          } else {
+            setLoading(false);
+            console.error('Error fetching orders:', response.statusText);
+          }
+        } catch (error) {
+          setLoading(false);
+          console.error('Error fetching orders:', error);
+        }
+      };
+    
+    
+      useEffect(() => {
+        getOrders();
+      }, [dateFilter]);
     return (
         <>
             <main className="h-full">
@@ -70,15 +103,15 @@ function ExpenseReport() {
                     <div className="bg-white shadow rounded-lg overflow-hidden">
                         <h2 className="bg-emerald-600 text-white p-2">Expense Details</h2>
                         <div className="p-3 items-center grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-x-4 gap-y-4">
-                            <div className="">
+                        <div className="">
                                 <label htmlFor="defaultInput" className="font-bold text-sm text-gray-600">
                                     Start Date <span className="text-red-600 text-md">*</span>
                                 </label>
                                 <input
-                                value={dateFilter.start}
+                                value={dateFilter.$gte}
                                     id="defaultInput"
                                     type="date"
-                                    onChange={(e) => setDateFilter({...dateFilter, start: e.target.value})}
+                                    onChange={(e) => setDateFilter({...dateFilter, '$gte': e.target.value})}
                                     name="defaultInput"
                                     // onChange={(e) => setEmail(e.target.value)}
                                     className="text-sm placeholder-gray-500 px-4 rounded-lg border border-gray-200 w-full md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1"
@@ -91,8 +124,8 @@ function ExpenseReport() {
                                 </label>
                                 <input
                                     id="defaultInput"
-                                    value={dateFilter.end}
-                                    onChange={(e) => setDateFilter({...dateFilter, end: e.target.value})}
+                                    value={dateFilter.$lte}
+                                    onChange={(e) => setDateFilter({...dateFilter, '$lte': e.target.value})}
                                     type="date"
                                     name="defaultInput"
                                     // onChange={(e) => setEmail(e.target.value)}

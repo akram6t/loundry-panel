@@ -13,7 +13,7 @@ export const expenseReportHeader = [
     },
     {
         key: 'tax_included',
-        label: 'Tax Included?'
+        label: 'Tax(%)?'
     },
     {
         key: 'payment_method',
@@ -34,6 +34,7 @@ export const expenseReportData = [
         name: 'Fuel',
         amount: 100,
         taxIncluded: 'YES',
+        taxPercentage: 10,
         paymentMethod: 'Cash'
     },
     {

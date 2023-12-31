@@ -10,6 +10,7 @@ import {
   import { NavLink, useLocation } from "react-router-dom";
   import "./style.css";
   import { useEffect } from "react";
+import { routes } from "../../utils/Constant";
   
   function BottomNavbar() {
     const menus = useMemo(
@@ -23,13 +24,13 @@ import {
         {
           label: "Notification",
           icon: faBell,
-          link: "/form",
+          link: routes.NOTIFICATIONS,
           dis: "translate-x-16",
         },
         {
-          label: "Quaries",
+          label: "Messages",
           icon: faMessage,
-          link: "/form",
+          link: routes.MESSAGES,
           dis: "translate-x-32",
         }
       ],

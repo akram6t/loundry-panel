@@ -7,7 +7,7 @@ import { formatDate } from "../../utils/FormatDate";
 // import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 // import { faPencil, faRemove } from "@fortawesome/free-solid-svg-icons";
 
-function CustomerTable({ loading, dataHeader, data, currentPage, itemsPerPage }) {
+function CustomerTable({loading, dataHeader, data, currentPage, itemsPerPage }) {
   return (
     <Datatables loading={loading} dataHeader={dataHeader}>
       {data?.map((row, index) => (
