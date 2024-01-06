@@ -108,8 +108,8 @@ function Banners() {
           {/* TopBar Start */}
           <div className="py-5 flex items-center justify-between">
             <div className="flex flex-col gap-y-2">
-              <h2 className="font-bold text-3xl">Expenses</h2>
-              <Linking currentPage="Expenses" data={LINKINGDATA().EXPENSES}/>
+              <h2 className="font-bold text-3xl">Banners</h2>
+              <Linking currentPage="Banners" data={LINKINGDATA().EXPENSES}/>
             </div>
             <button onClick={() => setCUModal({ status: true, collection: collection, data: { ...addData } })} className="bg-emerald-600 transition-all hover:bg-emerald-700 active:bg-emerald-800 text-gray-100 px-3 py-2 rounded-lg shadow-lg text-md">
               + Add New

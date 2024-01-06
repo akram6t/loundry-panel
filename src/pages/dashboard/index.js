@@ -10,14 +10,14 @@ import axios from "axios";
 import { Collections, URL_GET_LIST, URL_GET_ORDERS__STATUS_COUNT } from "../../utils/Constant.js";
 import ColorPicker from "../../components/Other/ColorPicker.jsx";
 import { useColor } from "react-color-palette";
+import AppIndicator from "../../components/Other/AppIndicator.jsx";
 
 function Dashboard() {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
-  const order_status = useSelector((state) => state.orderstatus.value);
-  const [ordersStatusList, setOrdersStatusList] = useState(order_status);
+  const [ordersStatusList, setOrdersStatusList] = useState(null);
 
-  const get_orders_status_count = async () => {
+  const get_orders_status_count = async (sList) => {
     setLoading(true);
     try {
       const response = await axios.get(URL_GET_ORDERS__STATUS_COUNT);
@@ -28,7 +28,7 @@ function Dashboard() {
         const { status, data, message } = response.data;
         if (status) {
           console.log(data);
-          handle_count_status(data);
+          handle_count_status(data, sList);
           // setOrderStatus([...status]);
           // console.log(orderStatus);
         }
@@ -54,10 +54,9 @@ function Dashboard() {
           setLoading(false);
           const {status, data, message} = response.data;
           if(status){
-            // console.log(ordersStatusList);
-            // setOrdersStatusList([...data]);
-            // console.log(ordersStatusList);
-            // get_orders_status_count();
+            console.log(data);
+            setOrdersStatusList([...data]);
+            get_orders_status_count(data);
           }
         } else {
           console.error('Error fetching orders status:', response.statusText);
@@ -69,9 +68,8 @@ function Dashboard() {
     };
 
 
-  const handle_count_status = (data) => {
-    // console.log(ordersStatus);
-    const st = ordersStatusList.map((status) => {
+  function handle_count_status(data, sList){
+    const st = sList.map((status) => {
       // Find corresponding entry in statusCount
       const countEntry = data.find((count) => count._id === status.tag);
       
@@ -86,14 +84,17 @@ function Dashboard() {
 
 
   useEffect(() => {
-    get_orders_status_count();
-    // getOrderStatus();
+    getOrderStatus();
   }, []);
 
   const avatar =
     "https://images.unsplash.com/photo-1491528323818-fdd1faba62cc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80";
   const [sidebarToggle] = useOutletContext();
 
+
+  if(ordersStatusList == null){
+    return<AppIndicator/>
+  }
 
 
   return (

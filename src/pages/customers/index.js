@@ -55,11 +55,11 @@ function Customers() {
   }, [dateFilter]);
 
   const filteredData = customersList.filter(item =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.mobile.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.date.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.email.toLowerCase().includes(searchTerm.toLowerCase()));
+    item.name.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
+    item.mobile.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
+    item.date.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
+    item.status.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
+    item.email.toLowerCase().includes(searchTerm.trim().toLowerCase()));
 
   const totalItems = filteredData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);

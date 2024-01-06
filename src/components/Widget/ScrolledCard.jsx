@@ -1,7 +1,6 @@
 import React from "react";
 import ProgressBar from "../Other/ProgressBar";
-
-const url = 'https://loundryapp.akram.pw/';
+import { ImageItentifier } from "../../utils/ImageIdentifier";
 
 function ScrolledCard({ item, ...props }) {
   return (
@@ -12,7 +11,7 @@ function ScrolledCard({ item, ...props }) {
       </div>
       <div>
         <img className="w-12 h-12 opacity-40" 
-          src={url + item.icon}/>
+          src={ImageItentifier(item.icon)}/>
       </div>
     </div>
   );

@@ -7,7 +7,7 @@ import AddressDetails from "./AddressDetails";
 import ServicesTables from "./ServicesTables";
 
 import { useSelector } from 'react-redux';
-import { Collections, URL_GET_LIST, URL_POST_DOCUMENT } from "../../../utils/Constant";
+import { Collections, URL_GET_LIST, URL_POST_DOCUMENT, URL_POST_NOTIFICATION } from "../../../utils/Constant";
 import axios from "axios";
 import { formatDate } from "../../../utils/FormatDate";
 import formatTime from "../../../utils/FormatTime";
@@ -27,7 +27,40 @@ function OrderDetails() {
 
   const [status, setOrderStatus] = useState('');
 
-  const order_status = useSelector((state) => state.orderstatus.value);
+  const [order_status, set_order_statuses] = useState(null);
+
+  const getOrderStatus = async () => {
+    set_order_statuses([]);
+    setLoading(true);
+    const params = {
+      collection: Collections.ORDERS_STATUS,
+      sort: JSON.stringify({position: 1}),
+    }
+    try {
+      const response = await axios.get(URL_GET_LIST(params));
+
+      if (response.status === 200) {
+        setLoading(false);
+        const {status, data, message} = response.data;
+        if(status){
+          set_order_statuses([...data]);
+          getOrder();
+        }
+      } else {
+        console.error('Error fetching orders status:', response.statusText);
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error('Error fetching orders status:', error);
+    }
+  };
+
+
+  useEffect(() => {
+    getOrderStatus();
+  }, []);
+
+  // const order_status = useSelector((state) => state.orderstatus.value);
 
   const paymentData = {
     order_id: order_id,
@@ -65,11 +98,6 @@ function OrderDetails() {
       console.error('Error fetching order details:', error);
     }
   };
-  
-
-  useEffect(() => {
-    getOrder();
-  }, []);
 
   const getpayments = async () => {
     setLoading(true);
@@ -102,6 +130,48 @@ function OrderDetails() {
   }, []);
 
 
+  const sendNotification = async (status) => {
+    setLoading(true);
+    const data = {
+      uid: details?.uid,
+      title: 'Order Id #' + details?.order_id,
+      message: 'Your order ' + status,
+      color: order_status.find(item => item.tag === status).color,
+      icon: order_status.find(item => item.tag === status).icon,
+      type: 'order',
+      status: 'unread'
+    }
+
+    try {
+      const response = await axios.post(URL_POST_NOTIFICATION, {
+        collection: Collections.NOTIFICATIONS,
+        data: {
+          ...data
+        }
+      });
+
+      if (response.status === 200) {
+        console.log(response.data);
+        setLoading(false);
+        const { status } = response.data;
+        if (status) {
+          toast.success(`notification send to user`)
+        //   sendNotification();
+        }
+      } else {
+        toast.error(response.statusText);
+        console.error(`Error crud: notification`, response.statusText);
+      }
+    } catch (error) {
+      setLoading(false);
+      toast.error(error.toString());
+      console.error(`Error crud: notification`, error);
+    }
+
+
+  }
+
+
   const handleChangeStatus = async (value) => {
     setLoading(true);
     setOrderStatus(value);
@@ -120,6 +190,7 @@ function OrderDetails() {
         const { status } = response.data;
         if (status) {
           toast.success(`Order Status Changed`)
+          sendNotification(value);
         }
       } else {
         toast.error(response.statusText);
@@ -143,7 +214,7 @@ function OrderDetails() {
     })
   }
 
-  if (details == null) {
+  if (details == null || order_status == null) {
     return (
       <AppIndicator />
     );
@@ -173,7 +244,7 @@ function OrderDetails() {
                   <h3>{details?.order_date && formatTime(details?.order_date)}</h3>
                 </div>
                 <h3 className="hidden sm:block sm:text-xl font-semibold text-emerald-700"># {order_id}</h3>
-                <select value={status} onChange={(e) => handleChangeStatus(e.target.value)} style={{ backgroundColor: order_status.find(item => item.tag == status).color }} className={`text-sm sm:text-lg text-white placeholder-gray-500 px-4 rounded-lg border border-gray-200 md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1`}>
+                <select value={status} onChange={(e) => handleChangeStatus(e.target.value)} style={{ backgroundColor: order_status?.find(item => item.tag === status) ? order_status?.find(item => item.tag === status).color : '#929292' }} className={`text-sm sm:text-lg text-white placeholder-gray-500 px-4 rounded-lg border border-gray-200 md:py-2 py-3 focus:outline-none focus:border-emerald-400 mt-1`}>
                   {
                     order_status.map((item, index) => {
                       return (
@@ -410,18 +481,4 @@ export default OrderDetails;
 //     "mobile": "9131265569",
 //     "pincode": "452006",
 //     "state": "Madhya Pradesh",
-//     "city": "Indore",
-//     "house": "512",
-//     "area": "01, Chandan Nagar",
-//     "type": "home",
-//     "nearby": "Asad kirana dukaan ke pass"
-//   },
-//   "payment_type": "Cash on Delivery",
-//   "service_fee": 5,
-//   "order_status": "Confirmed",
-//   "amount": 20,
-//   "order_id": "ORD_CC8B3ACRQY",
-//   "order_date": "2023-12-07T20:08:53.188Z",
-//   "storeid": "65442ccd8674edea93aa8587",
-//   "storename": "Golden Award"
-// }
+//     "city": "Indore

@@ -7,7 +7,7 @@ import LINKING_DATA from "../../data/linking_data";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPhone, faSave, faUpload } from "@fortawesome/free-solid-svg-icons";
 import { status } from "../../data/status";
-import { useSelector } from 'react-redux';
+// import { useSelector } from 'react-redux';
 import axios from "axios";
 import AppIndicator from "../../components/Other/AppIndicator";
 import { ImageItentifier } from "../../utils/ImageIdentifier";
@@ -19,8 +19,38 @@ function GeneralSettings() {
   const [showMedia, setShowMedia] = useState(false);
   const [sidebarToggle] = useOutletContext();
   const [loading, setLoading] = useState(false);
-  const order_status = useSelector((state) => state.orderstatus.value);
+  const [order_status, set_order_statuses] = useState([]);
   const [store, setStore] = useState(null);
+
+  const getOrderStatus = async () => {
+    set_order_statuses([]);
+    setLoading(true);
+    const params = {
+      collection: Collections.ORDERS_STATUS,
+      sort: JSON.stringify({position: 1}),
+    }
+    try {
+      const response = await axios.get(URL_GET_LIST(params));
+
+      if (response.status === 200) {
+        setLoading(false);
+        const {status, data, message} = response.data;
+        if(status){
+          set_order_statuses([...data]);
+        }
+      } else {
+        console.error('Error fetching orders status:', response.statusText);
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error('Error fetching orders status:', error);
+    }
+  };
+
+
+  useEffect(() => {
+    getOrderStatus();
+  }, []);
 
   const getStore = async () => {
     setLoading(true);

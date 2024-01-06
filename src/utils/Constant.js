@@ -40,8 +40,8 @@ const  routes = {
 
 }
 
-// export const BASE_URL = 'http://localhost:5000';
-export const BASE_URL = 'https://fixed-swamp-lingonberry.glitch.me';
+export const BASE_URL = 'http://localhost:5000';
+// export const BASE_URL = 'https://fixed-swamp-lingonberry.glitch.me';
 
 const URL_GET_LIST = (params) => {
     const queryParams = new URLSearchParams(params);
@@ -51,7 +51,9 @@ const URL_GET_LIST = (params) => {
 export const URL_DELETE_DOCUMENT = `${BASE_URL}/admin/apis/delete_document`;
 
 export const URL_POST_DOCUMENT = `${BASE_URL}/admin/apis/post_data`;
-// export const URL_UPDATE_DOCUMENT = `${BASE_URL}/admin/apis/post_data`;
+
+
+export const URL_POST_NOTIFICATION = `${BASE_URL}/admin/apis/post_notification`;
 
 export const URL_GET_ORDERS__STATUS_COUNT = `${BASE_URL}/admin/apis/orders_status_count`;
 export const URL_POST_MEDIA = `${BASE_URL}/admin/apis/add_media`;

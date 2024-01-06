@@ -47,7 +47,7 @@ function OrdersTable({ loading, dataHeader, data, handleDelete, currentPage, ite
             </span>
           </TableCell>
           <TableCell dataLabel="ORDER STATUS" showLabel={true}>
-            <span style={{ backgroundColor: ordersStatus.find(item => item.tag === row.order_status).color }} className={`rounded-full py-1 px-3 text-xs font-semibold text-white`}>
+            <span style={{ backgroundColor: ordersStatus?.find(item => item.tag === row.order_status) ? ordersStatus?.find(item => item.tag === row.order_status).color : '#929292' }} className={`rounded-full py-1 px-3 text-xs font-semibold text-white`}>
               {row.order_status}
             </span>
           </TableCell>

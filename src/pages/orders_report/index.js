@@ -10,12 +10,12 @@ import EntryOptions from "../../components/Other/EntryOptions";
 import SearchTable from "../../components/Other/SearchTable";
 // import { order_status } from "../../data/order_status";
 import { DateInInput } from "../../utils/DateInInput";
-import { useSelector } from "react-redux";
 import { Collections, DATE_ACC_DESC, URL_GET_LIST } from "../../utils/Constant";
 import axios from "axios";
+import AppIndicator from "../../components/Other/AppIndicator";
 
 function OrdersReport() {
-  const order_status = useSelector((state) => state.orderstatus.value);
+    const [order_status, set_order_statuses] = useState(null);
     const [ordersReportList, setOrdersReportList] = useState([]);
     const [sidebarToggle] = useOutletContext();
     const [loading, setLoading] = useState(false);
@@ -27,6 +27,7 @@ function OrdersReport() {
         $gte: DateInInput(new Date()),
         order_status: 'all'
     });
+
 
     const filteredData = ordersReportList.filter(item =>
         item.order_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -57,6 +58,36 @@ function OrdersReport() {
         setDateFilter({ ...dateFilter, order_status: value });
     }
 
+    const getOrderStatus = async () => {
+        set_order_statuses([]);
+        setLoading(true);
+        const params = {
+          collection: Collections.ORDERS_STATUS,
+          sort: JSON.stringify({position: 1}),
+        }
+        try {
+          const response = await axios.get(URL_GET_LIST(params));
+    
+          if (response.status === 200) {
+            setLoading(false);
+            const {status, data, message} = response.data;
+            if(status){
+              set_order_statuses([...data]);
+            }
+          } else {
+            console.error('Error fetching orders status:', response.statusText);
+          }
+        } catch (error) {
+          setLoading(false);
+          console.error('Error fetching orders status:', error);
+        }
+      };
+    
+    
+      useEffect(() => {
+        getOrderStatus();   
+      }, []);
+
     const getOrders = async () => {
         const query = dateFilter.order_status === 'all' ? {} : { order_status: dateFilter.order_status };
         setOrdersReportList([]);
@@ -86,10 +117,14 @@ function OrdersReport() {
         }
       };
     
-    
       useEffect(() => {
         getOrders();
       }, [dateFilter]);
+
+            
+      if(order_status == null){
+        return <AppIndicator/>
+      }
 
     return (
         <>

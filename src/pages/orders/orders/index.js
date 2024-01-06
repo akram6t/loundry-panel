@@ -12,7 +12,7 @@ import EntryOptions from "../../../components/Other/EntryOptions";
 import SearchTable from "../../../components/Other/SearchTable";
 import axios from 'axios';
 import { Collections, DATE_ACC_DESC, URL_GET_LIST } from "../../../utils/Constant";
-import { useSelector } from 'react-redux'; 
+import Appindicator from './../../../components/Other/AppIndicator';
 
 function Orders() {
   const [ordersList, setOrdersList] = useState([]);
@@ -23,7 +23,37 @@ function Orders() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const order_status = useSelector((state) => state.orderstatus.value);
+  const [order_status, set_order_status] = useState(null);
+
+  const getOrderStatus = async () => {
+    set_order_status([]);
+    setLoading(true);
+    const params = {
+      collection: Collections.ORDERS_STATUS,
+      sort: JSON.stringify({position: 1}),
+    }
+    try {
+      const response = await axios.get(URL_GET_LIST(params));
+
+      if (response.status === 200) {
+        setLoading(false);
+        const {status, data, message} = response.data;
+        if(status){
+          set_order_status([...data]);
+        }
+      } else {
+        console.error('Error fetching orders status:', response.statusText);
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error('Error fetching orders status:', error);
+    }
+  };
+
+
+  useEffect(() => {
+    getOrderStatus();
+  }, []);
 
   const getOrders = async () => {
     setLoading(true);
@@ -58,11 +88,10 @@ function Orders() {
 
 
   const filteredData = ordersList.filter(item =>
-    item.pickup_address.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.order_status.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.order_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.uid.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.payment_type.toLowerCase().includes(searchTerm.toLowerCase())
+    item.pickup_address.name.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
+    item.order_status.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
+    item.order_id.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
+    item.uid.toLowerCase().includes(searchTerm.trim().toLowerCase())
   );
 
   const totalItems = filteredData.length;
@@ -83,7 +112,11 @@ function Orders() {
     setCurrentPage(page);
   };
 
-  const handleDelete = () => { };
+  if(order_status == null){
+    return (
+      <Appindicator/>
+    )
+  }
 
   return (
     <>
@@ -121,7 +154,6 @@ function Orders() {
               loading={loading}
               dataHeader={ordersHeader}
               data={paginatedData}
-              handleDelete={handleDelete}
               currentPage={currentPage}
               itemsPerPage={itemsPerPage}
               ordersStatus={order_status}
