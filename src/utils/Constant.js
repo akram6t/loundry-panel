@@ -40,8 +40,8 @@ const  routes = {
 
 }
 
-export const BASE_URL = 'http://localhost:5000';
-// export const BASE_URL = 'https://fixed-swamp-lingonberry.glitch.me';
+// export const BASE_URL = 'http://localhost:5000';
+export const BASE_URL = 'https://fixed-swamp-lingonberry.glitch.me';
 
 const URL_GET_LIST = (params) => {
     const queryParams = new URLSearchParams(params);
