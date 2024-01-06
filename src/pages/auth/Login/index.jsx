@@ -68,8 +68,7 @@ function LoginIndex({setToken}) {
     return <AppIndicator/>
   }
 
-  const LoginImage =
-    "https://edp.raincode.my.id/static/media/login.cc0578413db10119a7ff.png";
+  const LoginImage = "https://edp.raincode.my.id/static/media/login.cc0578413db10119a7ff.png";
   return (
     <>
       <div className="flex min-h-screen">
