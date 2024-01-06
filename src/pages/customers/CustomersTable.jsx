@@ -32,7 +32,7 @@ function CustomerTable({loading, dataHeader, data, currentPage, itemsPerPage }) 
             <span className="font-medium text-sm text-gray-900">+91 {row.mobile}</span>
           </TableCell>
           <TableCell dataLabel="STATUS" showLabel={true}>
-            <span className={`${status.find(item => item.label === row.status).color} shadow rounded-full px-2 py-1 font-medium text-sm text-gray-900`}>
+            <span className={`${status.find(item => item.label === row.status) ? status.find(item => item.label === row.status).color : '#929292'} shadow rounded-full px-2 py-1 font-medium text-sm text-gray-900`}>
             { status.find(item => item.label === row.status).label }
             </span>
           </TableCell>
